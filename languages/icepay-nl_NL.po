@@ -1,0 +1,177 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Woocommerce Icepay\n"
+"POT-Creation-Date: 2012-09-24 13:34+0100\n"
+"PO-Revision-Date: 2012-09-24 13:38+0100\n"
+"Last-Translator: Wouter van Tilburg <wouter@icepay.eu>\n"
+"Language-Team: Wouter van Tilburg <wouter@icepay.eu>\n"
+"Language: Dutch\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.3\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop;__;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: ..\n"
+
+#: ../icepay.php:48
+msgid "Awaiting Payment"
+msgstr "Wachten op betaling"
+
+#: ../icepay.php:94
+msgid "AMEX"
+msgstr "American Express"
+
+#: ../icepay.php:95
+msgid "VISA"
+msgstr "Visa"
+
+#: ../icepay.php:96
+msgid "MASTER"
+msgstr "Master"
+
+#: ../icepay.php:97
+msgid "ABNAMRO"
+msgstr "ABN AMRO"
+
+#: ../icepay.php:98
+msgid "ASNBANK"
+msgstr "ASN Bank"
+
+#: ../icepay.php:99
+msgid "FRIESLAND"
+msgstr "Frieslandse bank"
+
+#: ../icepay.php:100
+msgid "ING"
+msgstr "ING"
+
+#: ../icepay.php:101
+msgid "RABOBANK"
+msgstr "Rabobank"
+
+#: ../icepay.php:102
+msgid "SNSBANK"
+msgstr "SNS Bank"
+
+#: ../icepay.php:103
+msgid "SNSREGIOBANK"
+msgstr "SNS Regio Bank"
+
+#: ../icepay.php:104
+msgid "TRIODOSBANK"
+msgstr "Triodosbank"
+
+#: ../icepay.php:105
+msgid "VANLANSCHOT"
+msgstr "Van Lanschot"
+
+#: ../icepay.php:121
+msgid ""
+"has been disabled because your webshop's configured currency is not "
+"supported by this payment method"
+msgstr ""
+"is gedeactiveerd, omdat uw webshop's geconfigureerde valuta niet ondersteund "
+"wordt door deze betaalmethode."
+
+#: ../icepay.php:139
+#, php-format
+msgid "Your country is not supported by %s"
+msgstr "Dit land wordt niet ondersteund door %s"
+
+#: ../icepay.php:140 ../icepay.php:149
+msgid "Payment error:"
+msgstr "Betalings fout:"
+
+#: ../icepay.php:148
+#, php-format
+msgid "The amount of this order is not supported by %s"
+msgstr "Het bedrag van deze bestelling wordt niet ondersteund door %s"
+
+#: ../icepay.php:255 ../icepay.php:365
+msgid "Set-up configuration"
+msgstr "Set-up configuratie"
+
+#: ../icepay.php:259
+msgid "Postback URL"
+msgstr "Postback URL"
+
+#: ../icepay.php:261
+msgid ""
+"Copy-Paste this URL to the Success, Error and Postback section of your "
+"ICEPAY merchant account."
+msgstr ""
+" Knip en plak dit in uw ICEPAY Merchant account pagina Thank you page, Error "
+"page en Postback URL"
+
+#: ../icepay.php:265
+msgid "Merchant ID"
+msgstr "Merchant ID"
+
+#: ../icepay.php:267
+msgid "Copy the Merchant ID from your ICEPAY account."
+msgstr " Kopieer het Merchant ID van uw ICEPAY account."
+
+#: ../icepay.php:271
+msgid "Secretcode"
+msgstr "Secretcode"
+
+#: ../icepay.php:273
+msgid "Copy the Secret Code from your ICEPAY account."
+msgstr " Kopieer de Secret cide van uw ICEPAY account."
+
+#: ../icepay.php:277
+msgid "(Optional) Description on transaction statement of customer"
+msgstr "(Niet verplicht) Beschrijving van de transactie"
+
+#: ../icepay.php:279
+msgid ""
+"Some payment methods allow customized descriptions on the transaction "
+"statement. If left empty the Order ID is used. (Max 100 char.)"
+msgstr ""
+" Sommige betaalmethoden accepteren een handmatige beschrijving van de "
+"betaling. Indien deze leeg gelaten word, wordt het WP Order ID gebruikt (Max "
+"100 tekens.)"
+
+#: ../icepay.php:283
+msgid "(Optional) Custom IP Range for IP Check for Postback"
+msgstr "(Niet verplicht) Handmatige IP Range voor IP Check op de Postback"
+
+#: ../icepay.php:285
+msgid ""
+"For example a proxy: 1.222.333.444-100.222.333.444 For multiple ranges use "
+"a , seperator: 2.2.2.2-5.5.5.5,8.8.8.8-9.9.9.9"
+msgstr ""
+" Bijvoorbeeld voor een proxy: 1.222.333.444-100.222.333.444 Voor meerdere "
+"ranges gebruik een ,: "
+"1.222.333.444-100.222.333.444,2.222.333.444-200.222.333.444"
+
+#: ../icepay.php:299
+msgid "Active"
+msgstr "Actief"
+
+#: ../icepay.php:304
+msgid "Display name"
+msgstr "Display naam"
+
+#: ../icepay.php:366
+msgid "Payment Methods"
+msgstr "Betaalmethoden"
+
+#: ../icepay.php:369
+msgid "View the manual"
+msgstr "Bekijk de handleiding"
+
+#: ../icepay.php:370
+msgid "Visit the ICEPAY website"
+msgstr "Bezoek de ICEPAY website"
+
+#: ../icepay.php:381
+msgid " Merchant ID and Secretcode must be set!"
+msgstr "Merchant ID en de Secretcode moeten ingesteld zijn!"
+
+#~ msgid "disabled-method"
+#~ msgstr ""
+#~ "is gedeactiveerd, omdat uw webshop's geconfigureerde valuta niet "
+#~ "ondersteund wordt door deze betaalmethode."
