@@ -1,0 +1,162 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Woocommerce ICEPAY\n"
+"POT-Creation-Date: 2012-09-24 13:37+0100\n"
+"PO-Revision-Date: 2012-09-24 13:38+0100\n"
+"Last-Translator: Wouter van Tilburg <wouter@icepay.eu>\n"
+"Language-Team: Wouter van Tilburg <wouter@icepay.eu>\n"
+"Language: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.3\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop;__;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: ..\n"
+"X-Poedit-SearchPath-1: .\n"
+
+#: ../icepay.php:48
+msgid "Awaiting Payment"
+msgstr ""
+
+#: ../icepay.php:94
+msgid "AMEX"
+msgstr "American Express"
+
+#: ../icepay.php:95
+msgid "VISA"
+msgstr "Visa"
+
+#: ../icepay.php:96
+msgid "MASTER"
+msgstr "Mastercard"
+
+#: ../icepay.php:97
+msgid "ABNAMRO"
+msgstr "ABN AMRO"
+
+#: ../icepay.php:98
+msgid "ASNBANK"
+msgstr "ASN BANK"
+
+#: ../icepay.php:99
+msgid "FRIESLAND"
+msgstr "Frieslandse Bank"
+
+#: ../icepay.php:100
+msgid "ING"
+msgstr "ING"
+
+#: ../icepay.php:101
+msgid "RABOBANK"
+msgstr "Rabobank"
+
+#: ../icepay.php:102
+msgid "SNSBANK"
+msgstr "SNS Bank"
+
+#: ../icepay.php:103
+msgid "SNSREGIOBANK"
+msgstr "SNS Regio Bank"
+
+#: ../icepay.php:104
+msgid "TRIODOSBANK"
+msgstr "Triodos Bank"
+
+#: ../icepay.php:105
+msgid "VANLANSCHOT"
+msgstr "Van Lanschot"
+
+#: ../icepay.php:121
+msgid ""
+"has been disabled because your webshop's configured currency is not "
+"supported by this payment method"
+msgstr ""
+
+#: ../icepay.php:139
+#, php-format
+msgid "Your country is not supported by %s"
+msgstr ""
+
+#: ../icepay.php:140 ../icepay.php:149
+msgid "Payment error:"
+msgstr ""
+
+#: ../icepay.php:148
+#, php-format
+msgid "The amount of this order is not supported by %s"
+msgstr ""
+
+#: ../icepay.php:255 ../icepay.php:365
+msgid "Set-up configuration"
+msgstr ""
+
+#: ../icepay.php:259
+msgid "Postback URL"
+msgstr ""
+
+#: ../icepay.php:261
+msgid ""
+"Copy-Paste this URL to the Success, Error and Postback section of your "
+"ICEPAY merchant account."
+msgstr ""
+
+#: ../icepay.php:265
+msgid "Merchant ID"
+msgstr ""
+
+#: ../icepay.php:267
+msgid "Copy the Merchant ID from your ICEPAY account."
+msgstr ""
+
+#: ../icepay.php:271
+msgid "Secretcode"
+msgstr ""
+
+#: ../icepay.php:273
+msgid "Copy the Secret Code from your ICEPAY account."
+msgstr ""
+
+#: ../icepay.php:277
+msgid "(Optional) Description on transaction statement of customer"
+msgstr ""
+
+#: ../icepay.php:279
+msgid ""
+"Some payment methods allow customized descriptions on the transaction "
+"statement. If left empty the Order ID is used. (Max 100 char.)"
+msgstr ""
+
+#: ../icepay.php:283
+msgid "(Optional) Custom IP Range for IP Check for Postback"
+msgstr ""
+
+#: ../icepay.php:285
+msgid ""
+"For example a proxy: 1.222.333.444-100.222.333.444 For multiple ranges use "
+"a , seperator: 2.2.2.2-5.5.5.5,8.8.8.8-9.9.9.9"
+msgstr ""
+
+#: ../icepay.php:299
+msgid "Active"
+msgstr ""
+
+#: ../icepay.php:304
+msgid "Display name"
+msgstr ""
+
+#: ../icepay.php:366
+msgid "Payment Methods"
+msgstr ""
+
+#: ../icepay.php:369
+msgid "View the manual"
+msgstr ""
+
+#: ../icepay.php:370
+msgid "Visit the ICEPAY website"
+msgstr ""
+
+#: ../icepay.php:381
+msgid " Merchant ID and Secretcode must be set!"
+msgstr ""
