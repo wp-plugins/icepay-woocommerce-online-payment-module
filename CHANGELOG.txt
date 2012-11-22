@@ -1,7 +1,16 @@
 [CHANGELOG]
 
+
+:: Version 1.0.3
+        Release date: 22 nov 2012
+        Developed by: Wouter van Tilburg
+
+        -  Fixed duplicate order id
+        -  Fixed cancel order emptying cart
+        ~
+
 :: Version 1.0.2
-		Release date: 30 okt 2012
+	Release date: 30 okt 2012
 	Developed by: Wouter van Tilburg
 	
 	- Fixed Wordpress footer causing to overlapse with input fields
@@ -9,7 +18,7 @@
 	~
 
 :: Version 1.0.1
-		Release date: 12 okt 2012
+	Release date: 12 okt 2012
 	Developed by: Wouter van Tilburg
 	
 	- Fixed language not being set properly

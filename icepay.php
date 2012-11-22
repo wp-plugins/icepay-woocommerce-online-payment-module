@@ -13,7 +13,7 @@
 /**
  * ICEPAY Woocommerce Payment module - Main script
  * 
- * @version 1.0.2
+ * @version 1.0.3
  * @author Wouter van Tilburg <wouter@icepay.eu>
  * @license http://opensource.org/licenses/GPL-3.0 GNU General Public License, version 3 (GPL-3.0)
  * @copyright Copyright (c) 2012 ICEPAY B.V.
@@ -24,11 +24,11 @@
  * Plugin URI: http://www.icepay.com/webshop-modules/online-payments-for-wordpress-woocommerce
  * Description: Enables ICEPAY within Woocommerce
  * Author: ICEPAY
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author URI: http://www.icepay.com
  */
 // Define constants
-define('ICEPAY_VERSION', '1.0.2');
+define('ICEPAY_VERSION', '1.0.3');
 define('ICEPAY_TRANSACTION_TABLE', 'woocommerce_icepay_transactions');
 define('ICEPAY_ERROR_LOG_TABLE', 'woocommerce_icepay_errors');
 
@@ -222,8 +222,14 @@ function WC_ICEPAY_Load() {
 
             $description = !empty($this->settings['descriptiontransaction']) ? $this->settings['descriptiontransaction'] : null;
 
+            // Add transaction to ICEPAY table
+            $table_name = $wpdb->prefix . ICEPAY_TRANSACTION_TABLE;
+            
+            $wpdb->insert($table_name, array('order_id' => $order_id, 'status' => Icepay_StatusCode::OPEN, 'transaction_id' => NULL));
+            $lastid = $wpdb->insert_id;
+            
             $paymentObj = new Icepay_PaymentObject();
-            $paymentObj->setOrderID($orderID)
+            $paymentObj->setOrderID($lastid)
                     ->setDescription($description)
                     ->setReference($orderID)
                     ->setAmount(intval($ic_obj->amount))
@@ -253,9 +259,7 @@ function WC_ICEPAY_Load() {
                 return;
             }
 
-            // Add transaction to ICEPAY table
-            $table_name = $wpdb->prefix . ICEPAY_TRANSACTION_TABLE;
-            $wpdb->insert($table_name, array('order_id' => $order_id, 'status' => Icepay_StatusCode::OPEN, 'transaction_id' => NULL));
+
 
             return array(
                 'result' => 'success',
@@ -525,13 +529,12 @@ function WC_ICEPAY_Load() {
                         $order_id = $data->orderID;
 
                         $table_icepay = $wpdb->prefix . ICEPAY_TRANSACTION_TABLE;
-                        $ic_order = $wpdb->get_row("SELECT * FROM $table_icepay WHERE `order_id` = $order_id");
-                        $order = &new WC_Order($order_id);
+                        $ic_order = $wpdb->get_row("SELECT * FROM $table_icepay WHERE `id` = $order_id");
+                        $order = &new WC_Order($ic_order->order_id);
 
                         if ($icepay->canUpdateStatus($ic_order->status)) {
                             switch ($data->status) {
                                 case Icepay_StatusCode::ERROR:
-                                    $order->update_status('cancelled');
                                     $order->add_order_note($data->statusCode);
                                     break;
                                 case Icepay_StatusCode::OPEN:
@@ -554,7 +557,7 @@ function WC_ICEPAY_Load() {
                             $wpdb->update($table_icepay, array('status' => $data->status, 'transaction_id' => $data->transactionID), array('order_id' => $order_id));
                         }
                     } else {
-                        if ($icepay->isVersionCheck()) {
+                        if ($icepay->isVersionCheck()) {                           
                             $dump = array(
                                 "module" => sprintf("ICEPAY Woocommerce payment module version %s using PHP API version %s", ICEPAY_VERSION, Icepay_Project_Helper::getInstance()->getReleaseVersion()), //<--- Module version and PHP API version
                                 "notice" => "Checksum validation passed!"
@@ -574,8 +577,10 @@ function WC_ICEPAY_Load() {
                     }
                 } else {
                     $order_id = $_GET['OrderID'];
-
-                    $order = new WC_Order($order_id);
+                    
+                    $table_icepay = $wpdb->prefix . ICEPAY_TRANSACTION_TABLE;
+                    $ic_order = $wpdb->get_row("SELECT * FROM $table_icepay WHERE `id` = $order_id");
+                    $order = &new WC_Order($ic_order->order_id);
 
                     $icepay = Icepay_Project_Helper::getInstance()->result();
                     
@@ -598,7 +603,7 @@ function WC_ICEPAY_Load() {
                             case Icepay_StatusCode::SUCCESS:
                                 $woocommerce->cart->empty_cart();
 
-                                $location = add_query_arg('key', $order->order_key, add_query_arg('order', $order_id, get_permalink(woocommerce_get_page_id('thanks'))));
+                                $location = add_query_arg('key', $order->order_key, add_query_arg('order', $ic_order->order_id, get_permalink(woocommerce_get_page_id('thanks'))));
                                 wp_safe_redirect($location);
                                 exit();
                                 break;
