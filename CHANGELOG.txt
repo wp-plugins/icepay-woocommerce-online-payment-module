@@ -1,0 +1,37 @@
+[CHANGELOG]
+
+:; Version 1.0.4
+		Release data: 12 december 2012
+		Developed by: Wouter van Tilburg
+		
+		- Fixed double order status and stock update
+		~
+:: Version 1.0.3
+        Release date: 22 nov 2012
+        Developed by: Wouter van Tilburg
+
+        -  Fixed duplicate order id
+        -  Fixed cancel order emptying cart
+        ~
+
+:: Version 1.0.2
+	Release date: 30 okt 2012
+	Developed by: Wouter van Tilburg
+	
+	- Fixed Wordpress footer causing to overlapse with input fields
+	- Fixed error log table not being installed
+	~
+
+:: Version 1.0.1
+	Release date: 12 okt 2012
+	Developed by: Wouter van Tilburg
+	
+	- Fixed language not being set properly
+	- Fixed Postback URL not being found
+	~
+
+::	Version 1.0.0: Initial release
+        Release date: 5 sep 2012
+	Developed by: Wouter van Tilburg & Olaf Abbenhuis
+	No information
+	~
