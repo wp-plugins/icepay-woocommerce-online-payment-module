@@ -1,6 +1,11 @@
 [CHANGELOG]
 
-
+:; Version 1.0.4
+		Release data: 12 december 2012
+		Developed by: Wouter van Tilburg
+		
+		- Fixed double order status and stock update
+		~
 :: Version 1.0.3
         Release date: 22 nov 2012
         Developed by: Wouter van Tilburg

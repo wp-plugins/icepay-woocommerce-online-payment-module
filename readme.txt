@@ -103,6 +103,11 @@ Visit our website for more information about this plugin, our accounts, and the 
 * Initial release - Release date: 15 october 2012
 
 == Upgrade Notice ==
+= 1.0.4 =
+= 1.0.3 =
+Please upgrade to make sure your WordPress and plugin install is secure.
+**Requires at least Wordpress WooCommerce plugin: 1.6.5.2**
+
 = 1.0.3 =
 = 1.0.2 =
 Please upgrade to make sure your WordPress and plugin install is secure.
