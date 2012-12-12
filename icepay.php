@@ -554,7 +554,7 @@ function WC_ICEPAY_Load() {
                                     break;
                             }
 
-                            $wpdb->update($table_icepay, array('status' => $data->status, 'transaction_id' => $data->transactionID), array('order_id' => $order_id));
+                            $wpdb->update($table_icepay, array('status' => $data->status, 'transaction_id' => $data->transactionID), array('id' => $order_id));
                         }
                     } else {
                         if ($icepay->isVersionCheck()) {                           
