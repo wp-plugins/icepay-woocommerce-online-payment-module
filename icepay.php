@@ -1,7 +1,7 @@
 <?php
 ########################################################################
 #                                                             	       #
-#           The property of ICEPAY www.icepay.eu                       #
+#           The property of ICEPAY www.icepay.com              #
 #                                                             	       #
 #       The merchant is entitled to change de ICEPAY plug-in           #
 #       code, any changes will be at merchant's own risk.	       #
@@ -13,7 +13,7 @@
 /**
  * ICEPAY Woocommerce Payment module - Main script
  * 
- * @version 1.0.3
+ * @version 1.0.4
  * @author Wouter van Tilburg <wouter@icepay.eu>
  * @license http://opensource.org/licenses/GPL-3.0 GNU General Public License, version 3 (GPL-3.0)
  * @copyright Copyright (c) 2012 ICEPAY B.V.
@@ -24,7 +24,7 @@
  * Plugin URI: http://www.icepay.com/webshop-modules/online-payments-for-wordpress-woocommerce
  * Description: Enables ICEPAY within Woocommerce
  * Author: ICEPAY
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author URI: http://www.icepay.com
  */
 // Define constants
@@ -441,7 +441,7 @@ function WC_ICEPAY_Load() {
                 </div>
                 <div style="padding-top: 95px; padding-right: 10px; font-size: 12px; float: right;">
                     <a href="http://www.icepay.com/downloads/pdf/manuals/wordpress-woocommerce/manual-wordpress-woocommerce.pdf" target="_BLANK" style="text-decoration: none;"><?php _e('View the manual', 'icepay'); ?></a> | 
-                    <a href="http://www.icepay.eu" style="text-decoration: none;" target="_BLANK"><?php _e('Visit the ICEPAY website', 'icepay'); ?></a> |
+                    <a href="http://www.icepay.com" style="text-decoration: none;" target="_BLANK"><?php _e('Visit the ICEPAY website', 'icepay'); ?></a> |
                     Module Version <?php echo ICEPAY_VERSION; ?>
                 </div>
             </div>
