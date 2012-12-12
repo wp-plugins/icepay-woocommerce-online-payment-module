@@ -28,7 +28,7 @@
  * Author URI: http://www.icepay.com
  */
 // Define constants
-define('ICEPAY_VERSION', '1.0.3');
+define('ICEPAY_VERSION', '1.0.4');
 define('ICEPAY_TRANSACTION_TABLE', 'woocommerce_icepay_transactions');
 define('ICEPAY_ERROR_LOG_TABLE', 'woocommerce_icepay_errors');
 
