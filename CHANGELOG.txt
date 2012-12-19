@@ -1,7 +1,14 @@
 [CHANGELOG]
 
-:; Version 1.0.4
-		Release data: 12 december 2012
+:: Version 1.0.5
+		Release date: 19 december 2012
+		Developed by: Wouter van Tilburg
+		
+		- Added KNAB issuer for iDeal
+		~
+		
+:: Version 1.0.4
+		Release date: 12 december 2012
 		Developed by: Wouter van Tilburg
 		
 		- Fixed double order status and stock update

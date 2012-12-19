@@ -13,7 +13,7 @@
 /**
  * ICEPAY Woocommerce Payment module - Main script
  * 
- * @version 1.0.4
+ * @version 1.0.5
  * @author Wouter van Tilburg <wouter@icepay.eu>
  * @license http://opensource.org/licenses/GPL-3.0 GNU General Public License, version 3 (GPL-3.0)
  * @copyright Copyright (c) 2012 ICEPAY B.V.
@@ -24,11 +24,11 @@
  * Plugin URI: http://www.icepay.com/webshop-modules/online-payments-for-wordpress-woocommerce
  * Description: Enables ICEPAY within Woocommerce
  * Author: ICEPAY
- * Version: 1.0.4
+ * Version: 1.0.5
  * Author URI: http://www.icepay.com
  */
 // Define constants
-define('ICEPAY_VERSION', '1.0.4');
+define('ICEPAY_VERSION', '1.0.5');
 define('ICEPAY_TRANSACTION_TABLE', 'woocommerce_icepay_transactions');
 define('ICEPAY_ERROR_LOG_TABLE', 'woocommerce_icepay_errors');
 
@@ -117,6 +117,7 @@ function WC_ICEPAY_Load() {
                 __('SNSREGIOBANK', 'icepay');
                 __('TRIODOSBANK', 'icepay');
                 __('VANLANSCHOT', 'icepay');
+                __('KNAB', 'icepay');
 
                 $output .= "<select name='{$this->paymentMethodCode}_issuer' style='width:164px; padding: 2px; margin-left: 7px;'>";
                 foreach ($issuers as $issuer) {
