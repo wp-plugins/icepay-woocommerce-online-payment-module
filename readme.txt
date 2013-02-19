@@ -113,6 +113,9 @@ Visit our website for more information about this plugin, our accounts, and the 
 * Initial release - Release date: 15 october 2012
 
 == Upgrade Notice ==
+= 2.0.0 =
+= 1.0.5 =
+Read the changelog carefully!
 = 1.0.5 =
 = 1.0.4 =
 Added KNAB to issuer list for iDeal
