@@ -1,5 +1,15 @@
 [CHANGELOG]
 
+:: Version 2.0.0
+		Release date: 19 feb 2012
+		Developed by: Wouter van Tilburg
+		
+		- Soap extension is now required
+		- Added extended checkout (Afterpay)
+		- Paymentmethods can now be retrieved directly from your icepay account
+		- Removed error log in backend
+		- Added order comments
+		
 :: Version 1.0.5
 		Release date: 19 december 2012
 		Developed by: Wouter van Tilburg

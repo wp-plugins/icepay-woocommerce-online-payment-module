@@ -1,29 +1,25 @@
 <?php
 
 /**
- *  ICEPAY Basicmode API library
+ *  ICEPAY API
  *
- *  @version 2.1.0
+ *  @version 2.2.0
  *  @author Olaf Abbenhuis
  *  @author Wouter van Tilburg
  *  @copyright Copyright (c) 2012, ICEPAY
  *
  */
-
 // Define constants
-if(!defined('DIR')) {
+if (!defined('DIR')) {
     define("DIR", realpath(dirname(__FILE__)));
 }
 
-if(!defined('DS')) {
+if (!defined('DS')) {
     define("DS", DIRECTORY_SEPARATOR);
 }
 
 // Include API base 
-require_once(DIR . DS .  "icepay_api_base.php");
-
-
-
+require_once(DIR . DS . "icepay_api_base.php");
 
 /**
  *  Icepay_Api_Basic class
@@ -35,6 +31,7 @@ require_once(DIR . DS .  "icepay_api_base.php");
  * @var string $_folderPaymentMethods Folder of paymentmethod classes
  * @var array $paymentMethods List of all classes
  * @var array $_paymentMethods Filtered list
+ * @package API_Basicmode
  *
  */
 class Icepay_Api_Basic extends Icepay_Api_Base {
@@ -52,6 +49,7 @@ class Icepay_Api_Basic extends Icepay_Api_Base {
      * @access public
      * @return instance of self
      */
+
     public static function getInstance() {
         if (!self::$instance)
             self::$instance = new self();
@@ -77,8 +75,9 @@ class Icepay_Api_Basic extends Icepay_Api_Base {
      */
     public function readFolder($dir = null) {
         $this->setPaymentMethodsFolder(DIR . DS . 'paymentmethods');
-        
-        if ($dir) $this->setPaymentMethodsFolder($dir);
+
+        if ($dir)
+            $this->setPaymentMethodsFolder($dir);
 
         $this->paymentMethods = array();
         try {
@@ -100,14 +99,14 @@ class Icepay_Api_Basic extends Icepay_Api_Base {
         }
         return $this;
     }
-    
+
     /**
      * Returns a single class based on payment method code
      * @since version 2.1.0
      * @access public
      * @param string pmcode
      */
-    public function getClassByPaymentMethodCode($pmcode){
+    public function getClassByPaymentMethodCode($pmcode) {
         return new $this->paymentMethods[strtolower($pmcode)]();
     }
 
@@ -213,9 +212,39 @@ class Icepay_Api_Basic extends Icepay_Api_Base {
 }
 
 /**
- *  Icepay_Basicmode class
- *  To start a basicmode payment
- *  @author Olaf Abbenhuis
+ * Icepay_Basicmode
+ *  
+ * The Basicmode class allows you to start a basicmode payment.
+ * 
+ * An example of how to start a basicmode payment
+ * 
+ * <pre>
+ * $paymentObj = new Icepay_PaymentObject();
+ * $paymentObj->setPaymentMethod('IDEAL')
+ *            ->setAmount(1000)
+ *            ->setCountry("NL")
+ *            ->setLanguage("NL")
+ *            ->setReference("ICEPAY Test Payment")
+ *            ->setDescription("ICEPAY Test Payment")
+ *            ->setCurrency("EUR")
+ *            ->setIssuer('ING')
+ *            ->setOrderID('icetest01');
+ * 
+ * $basicmode = Icepay_Basicmode::getInstance();
+ * $basicmode->setMerchantID(MERCHANTID) // Int
+ *           ->setSecretCode(SECRETCODE) // String
+ *           ->setProtocol('https')
+ *           ->validatePayment($paymentObj); // Required
+ * 
+ * $url = $basicmode->getURL(); // This is the payment URL you must redirect your customers to.
+ * </pre>
+ * 
+ * @version 1.0.1
+ * 
+ * @package API_Basicmode_Basicmode
+ * @author Wouter van Tilburg 
+ * @author Olaf Abbenhuis 
+ * @copyright Copyright (c) 2011-2012, ICEPAY  
  */
 class Icepay_Basicmode extends Icepay_Api_Base {
 
@@ -231,9 +260,7 @@ class Icepay_Basicmode extends Icepay_Api_Base {
     protected $_readable_name = "Basicmode";
     protected $_api_type = "basicmode";
     private $_defaultCountryCode = "00";
-    
     private $_generatedURL = "";
-    
     protected $paymentObj;
 
     /**
@@ -247,7 +274,7 @@ class Icepay_Basicmode extends Icepay_Api_Base {
             self::$instance = new self();
         return self::$instance;
     }
-    
+
     /**
      * Ensure the class data is set
      * @since version 1.0.0
@@ -257,40 +284,45 @@ class Icepay_Basicmode extends Icepay_Api_Base {
         $this->data = new stdClass();
         //$this->setPaymentMethodsFolder(DIR . '/paymentmethods/');
     }
-    
-    
+
     /**
      * Required for using the basicmode
      * @since version 2.1.0
      * @access public
      * @param Icepay_PaymentObject_Interface_Abstract $payment
      */
-    public function validatePayment(Icepay_PaymentObject_Interface_Abstract $payment){
- 
-        $this->data = $payment->getData();
-        
-        if (!$payment->getPaymentMethod()) return $this;
-        
+    public function validatePayment(Icepay_PaymentObject_Interface_Abstract $payment) {
+        /* Clear the generated URL */
+        $this->resetURL();
+
+        $this->data = (object) array_merge((array) $this->data, (array) $payment->getData());
+
+        if (!$payment->getPaymentMethod())
+            return $this;
+
         $paymentmethod = $payment->getBasicPaymentmethodClass();
 
         if (!$this->exists($payment->getCountry(), $paymentmethod->getSupportedCountries()))
             throw new Exception('Country not supported');
-        
+
         if (!$this->exists($payment->getCurrency(), $paymentmethod->getSupportedCurrency()))
             throw new Exception('Currency not supported');
-        
+
         if (!$this->exists($payment->getLanguage(), $paymentmethod->getSupportedLanguages()))
             throw new Exception('Language not supported');
-        
+
         if (!$this->exists($payment->getIssuer(), $paymentmethod->getSupportedIssuers()) && $payment->getPaymentMethod() != null)
             throw new Exception('Issuer not supported');
-        
+
         /* used for webservice call */
         $this->paymentObj = $payment;
-        
-        /* Clear the generated URL */
-        $this->_generatedURL = "";
-        
+
+        return $this;
+    }
+
+    public function resetURL() {
+        $this->_generatedURL = '';
+
         return $this;
     }
 
@@ -302,12 +334,13 @@ class Icepay_Basicmode extends Icepay_Api_Base {
      */
     public function getURL() {
 
-        if ($this->_generatedURL != "") return $this->_generatedURL;
-        
+        if ($this->_generatedURL != "")
+            return $this->_generatedURL;
+
         if (!isset($this->_merchantID))
             throw new Exception('Merchant ID not set, use the setMerchantID() method');
         if (!isset($this->_secretCode))
-            throw new Exception('Merchant ID not set, use the setSecretCode() method');
+            throw new Exception('Secretcode ID not set, use the setSecretCode() method');
 
         if (!isset($this->data->ic_country)) {
             if (count($this->_country) == 1) {
@@ -339,7 +372,7 @@ class Icepay_Basicmode extends Icepay_Api_Base {
 
         if (!isset($this->data->ic_amount))
             throw new Exception('Amount not set, use the setAmount() method');
-        
+
         if (!isset($this->data->ic_orderid))
             throw new Exception('OrderID not set, use the setOrderID() method');
 
@@ -356,7 +389,7 @@ class Icepay_Basicmode extends Icepay_Api_Base {
             $this->data->ic_urlcompleted = "";
         if (!isset($this->data->ic_urlerror))
             $this->data->ic_urlerror = "";
-        
+
         $this->data->ic_version = $this->_checkout_version;
         $this->data->ic_merchantid = $this->_merchantID;
         $this->data->chk = $this->generateCheckSumDynamic();
@@ -371,9 +404,9 @@ class Icepay_Basicmode extends Icepay_Api_Base {
             //$ws = Icepay_Api_Webservice::getInstance()->paymentService();
             $ws = Icepay_Api_Webservice::getInstance()->paymentService();
             $ws->setMerchantID($this->_merchantID)
-               ->setSecretCode($this->_secretCode)
-               ->setSuccessURL($this->data->ic_urlcompleted)
-               ->setErrorURL($this->data->ic_urlerror);
+                    ->setSecretCode($this->_secretCode)
+                    ->setSuccessURL($this->data->ic_urlcompleted)
+                    ->setErrorURL($this->data->ic_urlerror);
             try {
                 $this->_generatedURL = $ws->checkOut($this->paymentObj, true);
             } catch (Exception $e) {
@@ -381,13 +414,13 @@ class Icepay_Basicmode extends Icepay_Api_Base {
             }
             return $this->_generatedURL;
         }
-        
-        if (isset($this->data->ic_paymentmethod)){
+
+        if (isset($this->data->ic_paymentmethod)) {
             $this->_generatedURL = $this->postRequest($this->basicMode(), $this->prepareParameters());
         } else {
             $this->_generatedURL = sprintf("%s&%s", $this->basicMode(), $this->prepareParameters());
         }
-        
+
         return $this->_generatedURL;
     }
 
@@ -492,6 +525,8 @@ class Icepay_Basicmode extends Icepay_Api_Base {
      * @return string
      */
     protected function prepareParameters() {
+        var_dump($this->data);
+
         return http_build_query($this->data, '', '&');
     }
 
@@ -517,6 +552,5 @@ class Icepay_Basicmode extends Icepay_Api_Base {
     }
 
 }
-
 
 ?>
