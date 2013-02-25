@@ -13,7 +13,7 @@
 /**
  * ICEPAY Woocommerce Payment module - Main script
  * 
- * @version 2.0.0
+ * @version 2.0.1
  * @author Wouter van Tilburg <wouter@icepay.eu>
  * @license http://opensource.org/licenses/GPL-3.0 GNU General Public License, version 3 (GPL-3.0)
  * @copyright Copyright (c) 2012 ICEPAY B.V.
@@ -24,11 +24,11 @@
  * Plugin URI: http://www.icepay.com/webshop-modules/online-payments-for-wordpress-woocommerce
  * Description: Enables ICEPAY within Woocommerce
  * Author: ICEPAY
- * Version: 2.0.0
+ * Version: 2.0.1
  * Author URI: http://www.icepay.com
  */
 // Define constants
-define('ICEPAY_VERSION', '2.0.0');
+define('ICEPAY_VERSION', '2.0.1');
 define('ICEPAY_TRANSACTION_TABLE', 'woocommerce_icepay_transactions');
 define("ICEPAY_PM_INFO", 'woocommerce_icepay_pminfo');
 define("ICEPAY_PM_RAWDATA", 'woocommerce_icepay_pmrawdata');
@@ -65,7 +65,7 @@ function ICEPAY_register() {
 
     // Create Paymentmethods table for raw data
     $table_name = $wpdb->prefix . ICEPAY_PM_RAWDATA;
-    $sql = "CREATE TABLE $table_name (
+    $sql = "CREATE TABLE {$table_name} (
         `raw_pm_data` TEXT
     );";
 
@@ -174,7 +174,7 @@ function WC_ICEPAY_Load() {
                         $taxRatePercentage = round($product['line_tax'] / $product['line_total'] * 100, 2);
 
                         $price = round($pricePerProduct * $taxRateMultiplier, 2) * 100;
-                        
+
                         Icepay_Order::getInstance()
                                 ->addProduct(Icepay_Order_Product::create()
                                         ->setProductID($product['id'])
@@ -182,7 +182,7 @@ function WC_ICEPAY_Load() {
                                         ->setDescription($product['name'])
                                         ->setQuantity($product['qty'])
                                         ->setUnitPrice($price)
-                                        ->setVATCategory(Icepay_Order_VAT::getCategoryForPercentage((int)(string)$taxRatePercentage))
+                                        ->setVATCategory(Icepay_Order_VAT::getCategoryForPercentage($taxRatePercentage))
                         );
 
                         // WooCommerce calculates taxes per row instead of per unit price
@@ -192,7 +192,7 @@ function WC_ICEPAY_Load() {
 
                         $taxDifference = (int) (string) ($totalPriceTaxPerRow - $totalPriceTaxPerUnit);
 
-                        if (abs($taxDifference) > 0 && abs($taxDifference) < 10) {
+                        if ($taxDifference == -1) {
                             Icepay_Order::getInstance()
                                     ->addProduct(Icepay_Order_Product::create()
                                             ->setProductID($product['id'])
@@ -475,26 +475,28 @@ function WC_ICEPAY_Load() {
             // If no paymentmethods are stored, show message
             $icRawDataTable = $wpdb->prefix . ICEPAY_PM_RAWDATA;
             $paymentMethods = unserialize($wpdb->get_var("SELECT raw_pm_data FROM $icRawDataTable"));
+            
+            if ($paymentMethods) {
+                foreach ($paymentMethods as $key => $paymentMethod) {
+                    $methodTitle = sprintf("%stitle", $paymentMethod['PaymentMethodCode']);
+                    $this->form_fields[$methodTitle] = array(
+                        'title' => $paymentMethod['Description'],
+                        'type' => 'title'
+                    );
+                    $this->form_fields[$paymentMethod['PaymentMethodCode']] = array(
+                        'title' => __('Active', 'icepay'),
+                        'type' => 'checkbox',
+                        'label' => ' '
+                    );
 
-            foreach ($paymentMethods as $key => $paymentMethod) {
-                $methodTitle = sprintf("%stitle", $paymentMethod['PaymentMethodCode']);
-                $this->form_fields[$methodTitle] = array(
-                    'title' => $paymentMethod['Description'],
-                    'type' => 'title'
-                );
-                $this->form_fields[$paymentMethod['PaymentMethodCode']] = array(
-                    'title' => __('Active', 'icepay'),
-                    'type' => 'checkbox',
-                    'label' => ' '
-                );
-
-                $displayName = sprintf("%sdisplayname", $paymentMethod['PaymentMethodCode']);
-                $this->form_fields[$displayName] = array(
-                    'title' => __('Display name', 'icepay'),
-                    'type' => 'text',
-                    'css' => 'width: 300px;',
-                    'default' => $paymentMethod['Description']
-                );
+                    $displayName = sprintf("%sdisplayname", $paymentMethod['PaymentMethodCode']);
+                    $this->form_fields[$displayName] = array(
+                        'title' => __('Display name', 'icepay'),
+                        'type' => 'text',
+                        'css' => 'width: 300px;',
+                        'default' => $paymentMethod['Description']
+                    );
+                }
             }
         }
 
@@ -708,8 +710,8 @@ function WC_ICEPAY_Load() {
                                 wp_safe_redirect($location);
                                 exit();
                                 break;
-                            case Icepay_StatusCode::OPEN:
                             case Icepay_StatusCode::AUTHORIZED:
+                            case Icepay_StatusCode::OPEN:
                             case Icepay_StatusCode::SUCCESS:
                                 $woocommerce->cart->empty_cart();
 
@@ -736,18 +738,20 @@ function WC_ICEPAY_Load() {
             $icRawDataTable = $wpdb->prefix . ICEPAY_PM_RAWDATA;
             $paymentMethods = unserialize($wpdb->get_var("SELECT raw_pm_data FROM $icRawDataTable"));
 
-            $i = 0;
-            foreach ($paymentMethods as $paymentMethod) {
-                $key = $paymentMethod['PaymentMethodCode'];
+            if ($paymentMethods) {
+                $i = 0;
+                foreach ($paymentMethods as $paymentMethod) {
+                    $key = $paymentMethod['PaymentMethodCode'];
 
-                $gateway = 'WC_ICEPAY_Paymentmethod';
-                $icepaySettings = (array) get_option('woocommerce_icepay_settings');
+                    $gateway = 'WC_ICEPAY_Paymentmethod';
+                    $icepaySettings = (array) get_option('woocommerce_icepay_settings');
 
-                // If paymentmethod is enabled in the ICEPAY configuration, add this method as a gateway
-                if ($icepaySettings[$key] == 'yes') {
-                    $_SESSION['icepay_paymentmethods'][$i] = array($key);
-                    $methods[] = $gateway;
-                    $i++;
+                    // If paymentmethod is enabled in the ICEPAY configuration, add this method as a gateway
+                    if ($icepaySettings[$key] == 'yes') {
+                        $_SESSION['icepay_paymentmethods'][$i] = array($key);
+                        $methods[] = $gateway;
+                        $i++;
+                    }
                 }
             }
 

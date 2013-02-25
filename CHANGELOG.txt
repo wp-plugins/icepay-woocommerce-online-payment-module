@@ -1,5 +1,12 @@
 [CHANGELOG]
 
+:: Version 2.0.1
+		Release date: 25 feb 2012
+		Developed by: Wouter van Tlburg
+		
+		- Fixed fatal errors upon upgrading.
+		~
+		
 :: Version 2.0.0
 		Release date: 19 feb 2012
 		Developed by: Wouter van Tilburg
