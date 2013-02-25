@@ -1,5 +1,12 @@
 [CHANGELOG]
 
+:: Version 2.0.2
+		Release date: 25 feb 2012
+		Developed by: Wouter van Tilburg
+		
+		- Fixed rounding issue
+		~
+		
 :: Version 2.0.1
 		Release date: 25 feb 2012
 		Developed by: Wouter van Tlburg

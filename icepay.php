@@ -13,7 +13,7 @@
 /**
  * ICEPAY Woocommerce Payment module - Main script
  * 
- * @version 2.0.1
+ * @version 2.0.2
  * @author Wouter van Tilburg <wouter@icepay.eu>
  * @license http://opensource.org/licenses/GPL-3.0 GNU General Public License, version 3 (GPL-3.0)
  * @copyright Copyright (c) 2012 ICEPAY B.V.
@@ -24,11 +24,11 @@
  * Plugin URI: http://www.icepay.com/webshop-modules/online-payments-for-wordpress-woocommerce
  * Description: Enables ICEPAY within Woocommerce
  * Author: ICEPAY
- * Version: 2.0.1
+ * Version: 2.0.2
  * Author URI: http://www.icepay.com
  */
 // Define constants
-define('ICEPAY_VERSION', '2.0.1');
+define('ICEPAY_VERSION', '2.0.2');
 define('ICEPAY_TRANSACTION_TABLE', 'woocommerce_icepay_transactions');
 define("ICEPAY_PM_INFO", 'woocommerce_icepay_pminfo');
 define("ICEPAY_PM_RAWDATA", 'woocommerce_icepay_pmrawdata');
@@ -254,7 +254,7 @@ function WC_ICEPAY_Load() {
                 $ic_obj = new StdClass();
 
                 // Get the grand total of order
-                $ic_obj->amount = (string) (int) ($order->order_total * 100);
+                $ic_obj->amount = (int)(string) ($order->order_total * 100);
 
                 // Get the billing country
                 $ic_obj->country = $order->billing_country;
