@@ -1,21 +1,29 @@
 [CHANGELOG]
 
+:: Version 2.1.0
+		Release date: 21 mar 2013
+		Developed by: Wouter van Tilburg
+		
+		- Added WooCommerce 2.0.0 compatiblity
+		- Fixed small bug fixes
+		~
+		
 :: Version 2.0.2
-		Release date: 25 feb 2012
+		Release date: 25 feb 2013
 		Developed by: Wouter van Tilburg
 		
 		- Fixed rounding issue
 		~
 		
 :: Version 2.0.1
-		Release date: 25 feb 2012
+		Release date: 25 feb 2013
 		Developed by: Wouter van Tlburg
 		
 		- Fixed fatal errors upon upgrading.
 		~
 		
 :: Version 2.0.0
-		Release date: 19 feb 2012
+		Release date: 19 feb 2013
 		Developed by: Wouter van Tilburg
 		
 		- Soap extension is now required
