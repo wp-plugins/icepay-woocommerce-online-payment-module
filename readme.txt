@@ -91,7 +91,7 @@ Visit our website for more information about this plugin, our accounts, and the 
 
 = 2.1.0 =
 * Added WooCommerce 2.0.0 compatiblity
-* Fixed small bug fixes
+* Small bug fixes
 
 = 2.0.2 =
 * Fixed rounding issue
