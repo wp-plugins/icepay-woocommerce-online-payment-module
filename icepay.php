@@ -13,7 +13,7 @@
 /**
  * ICEPAY Woocommerce Payment module - Main script
  * 
- * @version 2.1.0
+ * @version 2.1.1
  * @author Wouter van Tilburg <wouter@icepay.eu>
  * @license http://opensource.org/licenses/GPL-3.0 GNU General Public License, version 3 (GPL-3.0)
  * @copyright Copyright (c) 2012 ICEPAY B.V.
@@ -24,11 +24,11 @@
  * Plugin URI: http://www.icepay.com/webshop-modules/online-payments-for-wordpress-woocommerce
  * Description: Enables ICEPAY within Woocommerce
  * Author: ICEPAY
- * Version: 2.1.0
+ * Version: 2.1.1
  * Author URI: http://www.icepay.com
  */
 // Define constants
-define('ICEPAY_VERSION', '2.1.0');
+define('ICEPAY_VERSION', '2.1.1');
 define('ICEPAY_TRANSACTION_TABLE', 'woocommerce_icepay_transactions');
 define("ICEPAY_PM_INFO", 'woocommerce_icepay_pminfo');
 define("ICEPAY_PM_RAWDATA", 'woocommerce_icepay_pmrawdata');
@@ -40,21 +40,24 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
     // Require ICEPAY API
     require(realpath(dirname(__FILE__)) . '/api/icepay_api_webservice.php');
 
-    // Add hook for activation
-    register_activation_hook(__FILE__, 'ICEPAY_register');
+    register_activation_hook(__FILE__, array('ICEPAY_Install', 'ICEPAY_Install'));
+    add_action('admin_init', array('ICEPAY_Install', 'ICEPAY_Upgrade'));
+    add_action('plugins_loaded', 'WC_ICEPAY_Load', 0);
 
-    // This function is called when ICEPAY is being activated
-    function ICEPAY_register() {
-        global $wpdb;
+    class ICEPAY_Install {
 
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        // This function is called when ICEPAY is being activated
+        public function ICEPAY_Install() {
+            global $wpdb;
 
-        // Add custom status (To prevent user cancel - or re-pay on standard status pending)
-        wp_insert_term(__('Awaiting Payment', 'icepay'), 'shop_order_status');
+            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-        // Create ICEPAY Transactions table
-        $table_name = $wpdb->prefix . ICEPAY_TRANSACTION_TABLE;
-        $sql = "CREATE TABLE {$table_name} (
+            // Add custom status (To prevent user cancel - or re-pay on standard status pending)
+            wp_insert_term(__('Awaiting Payment', 'icepay'), 'shop_order_status');
+
+            // Create ICEPAY Transactions table
+            $table_name = $wpdb->prefix . ICEPAY_TRANSACTION_TABLE;
+            $sql = "CREATE TABLE {$table_name} (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `order_id` int(11) NOT NULL,
             `status` varchar(255) NOT NULL,
@@ -62,28 +65,62 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         PRIMARY KEY (`id`)
         );";
 
-        dbDelta($sql);
+            dbDelta($sql);
 
-        // Create Paymentmethods table for raw data
-        $table_name = $wpdb->prefix . ICEPAY_PM_RAWDATA;
-        $sql = "CREATE TABLE {$table_name} (
+            // Create Paymentmethods table for raw data
+            $table_name = $wpdb->prefix . ICEPAY_PM_RAWDATA;
+            $sql = "CREATE TABLE {$table_name} (
             `raw_pm_data` TEXT
         );";
 
-        dbDelta($sql);
+            dbDelta($sql);
 
-        // Create ICEPAY pm info table
-        $table_name = $wpdb->prefix . ICEPAY_PM_INFO;
-        $sql = "CREATE TABLE {$table_name} (
+            // Create ICEPAY pm info table
+            $table_name = $wpdb->prefix . ICEPAY_PM_INFO;
+            $sql = "CREATE TABLE {$table_name} (
             `id` int(11) NOT NULL,            
             `pm_code` varchar(255),
             `pm_name` varchar(255)
         );";
 
-        dbDelta($sql);
-    }
+            dbDelta($sql);
+        }
 
-    add_action('plugins_loaded', 'WC_ICEPAY_Load', 0);
+        public function ICEPAY_Upgrade() {
+            global $wpdb;
+            
+            // Get code version ICEPAY_VERSION and compare to database stored version.
+            // If version db version is outdated, run code and update database stored version.
+            // Define database stored version in ICEPAY_register()             
+            $codeVersion = ICEPAY_VERSION;
+            $dbVersion = (get_option('ICEPAY_Version', null)) ? get_option('ICEPAY_Version') : '1.0.0'; // get_option('ICEPAY_Version');
+            
+            if (version_compare($dbVersion, $codeVersion) < '2.1.0') {
+                require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+                
+                // Create Paymentmethods table for raw data
+                $table_name = $wpdb->prefix . ICEPAY_PM_RAWDATA;
+                $sql = "CREATE TABLE {$table_name} (
+                    `raw_pm_data` TEXT
+                );";
+
+                dbDelta($sql);
+
+                // Create ICEPAY pm info table
+                $table_name = $wpdb->prefix . ICEPAY_PM_INFO;
+                $sql = "CREATE TABLE {$table_name} (
+                    `id` int(11) NOT NULL,            
+                    `pm_code` varchar(255),
+                    `pm_name` varchar(255)
+                );";
+
+                dbDelta($sql);
+
+                update_option('ICEPAY_Version', ICEPAY_VERSION);
+            }
+        }
+
+    }
 
     function WC_ICEPAY_Load() {
 
@@ -98,7 +135,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 $this->id = "ICEPAY_{$paymentMethod->pm_code}";
                 $this->method_title = "ICEPAY {$paymentMethod->pm_name}";
                 $this->paymentMethodCode = $paymentMethod->pm_code;
-                
+
                 /* 1.6.6 */
                 add_action('woocommerce_update_options_payment_gateways', array(&$this, 'process_admin_options'));
 
@@ -186,7 +223,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 </div>
 
                 <table class="icepay-settings">
-                    <?php $this->generate_settings_html(); ?>
+                <?php $this->generate_settings_html(); ?>
                 </table>
                 <?php
             }
@@ -329,7 +366,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
                     $supportedIssuers = $pMethod->getIssuers();
                     $issuerName = sprintf('%s_issuer', $paymentMethod[1]);
-                    
+
                     if (isset($_POST[$issuerName])) {
                         $issuer = $_POST[$issuerName];
                     } elseif (count($supportedIssuers > 0)) {
@@ -345,7 +382,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
                     $wpdb->insert($table_name, array('order_id' => $order_id, 'status' => Icepay_StatusCode::OPEN, 'transaction_id' => NULL));
                     $lastid = $wpdb->insert_id;
-                    
+
                     $paymentObj = new Icepay_PaymentObject();
                     $paymentObj->setOrderID($lastid)
                             ->setDescription($description)
@@ -548,7 +585,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
                             $i++;
                         }
-                        
+
                         $html .= "</ul>";
                     }
                 } catch (Exception $e) {
@@ -677,15 +714,16 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                             <?php
                             foreach ($paymentMethods as $paymentMethod) {
                                 if (version_compare(WOOCOMMERCE_VERSION, '2.0', '>=')) {
-                                ?>
-                                <li>
-                                    <a href='<?php echo admin_url(); ?>admin.php?page=woocommerce_settings&tab=payment_gateways&section=ICEPAY_PaymentMethod_<?php echo $paymentMethod->id; ?>'><?php echo $paymentMethod->pm_name; ?></a>
-                                </li>                                
-                                <?php } else { ?>
-                                <li>
-                                    <a href='<?php echo admin_url(); ?>admin.php?page=woocommerce_settings&tab=payment_gateways&saved=true&subtab=gateway-ICEPAY_<?php echo $paymentMethod->pm_code; ?>'><?php echo $paymentMethod->pm_name; ?></a>
-                                </li> 
-                                <?php }
+                                    ?>
+                                    <li>
+                                        <a href='<?php echo admin_url(); ?>admin.php?page=woocommerce_settings&tab=payment_gateways&section=ICEPAY_PaymentMethod_<?php echo $paymentMethod->id; ?>'><?php echo $paymentMethod->pm_name; ?></a>
+                                    </li>                                
+                        <?php } else { ?>
+                                    <li>
+                                        <a href='<?php echo admin_url(); ?>admin.php?page=woocommerce_settings&tab=payment_gateways&saved=true&subtab=gateway-ICEPAY_<?php echo $paymentMethod->pm_code; ?>'><?php echo $paymentMethod->pm_name; ?></a>
+                                    </li> 
+                                    <?php
+                                }
                             }
                             ?></ul>                            
                         <?php
