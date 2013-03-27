@@ -336,8 +336,10 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
         $obj->SecretCode = null;
 
         $this->_paymentMethods = $this->client->GetMyPaymentMethods(array('request' => $obj));
-
-        $this->_paymentMethodsArray = $this->clean($this->_paymentMethods);
+        
+        if (isset($this->_paymentMethods->GetMyPaymentMethodsResult->PaymentMethods->PaymentMethod)) {
+            $this->_paymentMethodsArray = $this->clean($this->_paymentMethods);
+        }
 
         return $this;
     }
@@ -352,6 +354,7 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
      */
     protected function clean($obj) {
         $methods = array();
+
         foreach ($this->forceArray($obj->GetMyPaymentMethodsResult->PaymentMethods->PaymentMethod) as $value) {
             array_push($methods, array(
                 'PaymentMethodCode' => $value->PaymentMethodCode,

@@ -620,7 +620,7 @@ class Icepay_Order {
                 ->setDescription($description)
                 ->setQuantity('1')
                 ->setUnitPrice(-$amount)
-                ->setVATCategory(Icepay_Order_VAT::getCategoryForPercentage(0));
+                ->setVATCategory(Icepay_Order_VAT::getCategoryForPercentage(-1));
 
         $this->addProduct($obj);
 
