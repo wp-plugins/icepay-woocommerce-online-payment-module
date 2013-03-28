@@ -23,9 +23,8 @@
  * Description: Enables ICEPAY Plugin within Woocommerce
  * Author: ICEPAY
  * Author URI: http://www.icepay.com
- * Version: 2.2.0
+ * Version: 2.2.1
  */
-
 // Make sure WooCommerce is installed and active
 if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))))
     return;
@@ -35,7 +34,7 @@ add_action('plugins_loaded', 'ICEPAY_Init', 0);
 
 require(realpath(dirname(__FILE__)) . '/api/icepay_api_webservice.php');
 require(realpath(dirname(__FILE__)) . '/classes/helper.php');
-    
+
 function ICEPAY_Init() {
 
     class ICEPAY extends WC_Payment_Gateway {
@@ -98,8 +97,8 @@ function ICEPAY_Init() {
         public function enqueueScripts() {
             // Add files only on ICEPAY's configuration page
             if (ICEPAY_helper::isIcepayPage($this->id)) {
-                wp_enqueue_script('icepay', '/wp-content/plugins/icepay/assets/js/icepay.js', array('jquery'), '1.0');
-                wp_enqueue_style('icepay', '/wp-content/plugins/icepay/assets/css/icepay.css', array(), '1.0');
+                wp_enqueue_script('icepay', '/wp-content/plugins/icepay-woocommerce-online-payment-module/assets/js/icepay.js', array('jquery'), '1.0');
+                wp_enqueue_style('icepay', '/wp-content/plugins/icepay-woocommerce-online-payment-module/assets/css/icepay.css', array(), '1.0');
             }
         }
 
@@ -111,8 +110,8 @@ function ICEPAY_Init() {
 
                     $icepay = Icepay_Project_Helper::getInstance()->postback();
                     $icepay->setMerchantID($this->settings['merchantid'])
-                           ->setSecretCode($this->settings['secretcode'])
-                           ->doIPCheck(true);
+                            ->setSecretCode($this->settings['secretcode'])
+                            ->doIPCheck(true);
 
                     if (!empty($this->settings['ipcheck'])) {
                         $ipRanges = explode(",", $this->settings['ipcheck']);
@@ -460,49 +459,53 @@ function ICEPAY_Init() {
 
             $this->iceCoreSettings = get_option($this->plugin_id . 'ICEPAY_settings', null);
 
-            $paymentMethods = unserialize($wpdb->get_var("SELECT raw_pm_data FROM `{$this->getTableWithPrefix('woocommerce_icepay_pmrawdata')}`"));
+            $paymentMethods = $wpdb->get_var("SELECT raw_pm_data FROM `{$this->getTableWithPrefix('woocommerce_icepay_pmrawdata')}`");
 
-            $method = Icepay_Api_Webservice::getInstance()->singleMethod()->loadFromArray($paymentMethods);
-            $pMethod = $method->selectPaymentMethodByCode($paymentMethod->pm_code);
+            if ($paymentMethods != null) {
+                $paymentMethods = unserialize($wpdb->get_var("SELECT raw_pm_data FROM `{$this->getTableWithPrefix('woocommerce_icepay_pmrawdata')}`"));
 
-            $issuers = $pMethod->getIssuers();
+                $method = Icepay_Api_Webservice::getInstance()->singleMethod()->loadFromArray($paymentMethods);
+                $pMethod = $method->selectPaymentMethodByCode($paymentMethod->pm_code);
 
-            $output = sprintf("<input type='hidden' name='paymentMethod' value='%s' />", $paymentMethod->pm_code);
+                $issuers = $pMethod->getIssuers();
 
-            $image = sprintf("%s/assets/images/%s.png", plugins_url('', __FILE__), strtolower($paymentMethod->pm_code));
-            $output .= "<img src='{$image}' />";
+                $output = sprintf("<input type='hidden' name='paymentMethod' value='%s' />", $paymentMethod->pm_code);
 
-            if (count($issuers) > 1) {
-                __('AMEX', 'icepay');
-                __('VISA', 'icepay');
-                __('MASTER', 'icepay');
-                __('ABNAMRO', 'icepay');
-                __('ASNBANK', 'icepay');
-                __('FRIESLAND', 'icepay');
-                __('ING', 'icepay');
-                __('RABOBANK', 'icepay');
-                __('SNSBANK', 'icepay');
-                __('SNSREGIOBANK', 'icepay');
-                __('TRIODOSBANK', 'icepay');
-                __('VANLANSCHOT', 'icepay');
-                __('KNAB', 'icepay');
+                $image = sprintf("%s/assets/images/%s.png", plugins_url('', __FILE__), strtolower($paymentMethod->pm_code));
+                $output .= "<img src='{$image}' />";
 
-                $output .= "<select name='{$paymentMethod->pm_code}_issuer' style='width:164px; padding: 2px; margin-left: 7px;'>";
+                if (count($issuers) > 1) {
+                    __('AMEX', 'icepay');
+                    __('VISA', 'icepay');
+                    __('MASTER', 'icepay');
+                    __('ABNAMRO', 'icepay');
+                    __('ASNBANK', 'icepay');
+                    __('FRIESLAND', 'icepay');
+                    __('ING', 'icepay');
+                    __('RABOBANK', 'icepay');
+                    __('SNSBANK', 'icepay');
+                    __('SNSREGIOBANK', 'icepay');
+                    __('TRIODOSBANK', 'icepay');
+                    __('VANLANSCHOT', 'icepay');
+                    __('KNAB', 'icepay');
 
-                foreach ($issuers as $issuer) {
-                    $output .= sprintf("<option value='%s'>%s</option>", $issuer['IssuerKeyword'], __($issuer['IssuerKeyword'], 'icepay'));
+                    $output .= "<select name='{$paymentMethod->pm_code}_issuer' style='width:164px; padding: 2px; margin-left: 7px;'>";
+
+                    foreach ($issuers as $issuer) {
+                        $output .= sprintf("<option value='%s'>%s</option>", $issuer['IssuerKeyword'], __($issuer['IssuerKeyword'], 'icepay'));
+                    }
+
+                    $output .= '</select>';
                 }
 
-                $output .= '</select>';
+                $this->description = $output;
             }
-
-            $this->description = $output;
         }
 
         public function admin_options() {
             ob_start();
-                $this->generate_settings_html();
-                $settings = ob_get_contents();
+            $this->generate_settings_html();
+            $settings = ob_get_contents();
             ob_end_clean();
 
             $variables = array(
@@ -676,7 +679,7 @@ function ICEPAY_Init() {
                 // Add transaction to ICEPAY table
                 $wpdb->insert($this->getTableWithPrefix('woocommerce_icepay_transactions'), array('order_id' => $order_id, 'status' => Icepay_StatusCode::OPEN, 'transaction_id' => NULL));
                 $lastid = $wpdb->insert_id;
-                
+
                 $paymentObj = new Icepay_PaymentObject();
                 $paymentObj->setOrderID($lastid)
                         ->setDescription($description)
