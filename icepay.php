@@ -293,7 +293,7 @@ function ICEPAY_Init() {
 
             ICEPAY_Helper::generateListItems($paymentMethods, $variables);
 
-            $template = file_get_contents(plugins_url('', __FILE__) . '/templates/admin.php');
+            $template = file_get_contents(plugin_dir_path(__FILE__) . 'templates/admin.php');
 
             foreach ($variables as $key => $value) {
                 $template = str_replace($key, $value, $template);
@@ -519,7 +519,7 @@ function ICEPAY_Init() {
                 '{list}' => ''
             );
 
-            $template = file_get_contents(plugins_url('', __FILE__) . '/templates/admin.php');
+            $template = file_get_contents(plugin_dir_path(__FILE__) . 'templates/admin.php');
 
             foreach ($variables as $key => $value) {
                 $template = str_replace($key, $value, $template);
