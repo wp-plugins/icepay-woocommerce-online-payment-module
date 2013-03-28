@@ -2,7 +2,7 @@
 
 class ICEPAY_Helper {
 
-    private static $version = '2.2.0';
+    private static $version = '2.2.1';
     
     public static function generateListItems($paymentMethods, &$variables) {
         if ($paymentMethods) {
