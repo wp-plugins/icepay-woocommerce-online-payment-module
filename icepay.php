@@ -23,28 +23,24 @@
  * Description: Enables ICEPAY Plugin within Woocommerce
  * Author: ICEPAY
  * Author URI: http://www.icepay.com
- * Version: 2.2.1
+ * Version: 2.2.2
  */
-// Make sure WooCommerce is installed and active
-if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))))
-    return;
 
 // Launch ICEPAY when active plugins and pluggable functions are loaded
-add_action('plugins_loaded', 'ICEPAY_Init', 0);
+add_action('plugins_loaded', 'ICEPAY_Init');
 
 require(realpath(dirname(__FILE__)) . '/api/icepay_api_webservice.php');
 require(realpath(dirname(__FILE__)) . '/classes/helper.php');
 
 function ICEPAY_Init() {
-
+    if (!class_exists('WC_Payment_Gateway'))
+        return;
+    
     class ICEPAY extends WC_Payment_Gateway {
 
         public function __construct() {
             // Load ICEPAY translations
             load_plugin_textdomain('icepay', false, dirname(plugin_basename(__FILE__)) . '/languages/');
-
-            // Add ICEPAY as WooCommerce gateway
-            add_filter('woocommerce_payment_gateways', array($this, 'addGateway'));
 
             // Set core gateway settings
             $this->method_title = 'ICEPAY';
@@ -53,18 +49,39 @@ function ICEPAY_Init() {
 
             $this->version = ICEPAY_Helper::getVersion();
 
-            // Icepay callback
-            add_action('init', array($this, 'result'));
+            // Create admin configuration form
+            $this->initForm();
+
+            // Initialise gateway settings
+            $this->init_settings();
+
+            // Core gateway is for configuration use only and should never be enabled
+            $this->enabled = false;
+
+            // Add postback URL to configuration form
+            $this->settings['postbackurl'] = str_replace('https:', 'http:', add_query_arg('wc-api', 'icepay_result', home_url('/')));
+
+            // Payment listener/API hook
+            add_action('woocommerce_api_icepay_result', array($this, 'result'));
+
+            // Since we use a class wrapper, our class is called  twice. To prevent double execution we do a check if the gateway is already registered.
+            $loaded_gateways = apply_filters('woocommerce_payment_gateways', array());
+            if (in_array($this->id, $loaded_gateways))
+                return;
+
+            // Add ICEPAY as WooCommerce gateway
+            add_filter('woocommerce_payment_gateways', array($this, 'addGateway'));
 
             // Check if on admin page
             if (is_admin()) {
-                // Run install if false
+                // Run install if false - not using install hook to make sure people who upgrade get the correct tables installed (Upgrade function was added later)
                 if (!get_option('ICEPAY_Installed', false))
                     $this->install();
 
                 // Run upgrade if new version
-                if (version_compare(get_option('ICEPAY_Version', '1.0.0'), $this->version) < $this->version)
+                if (version_compare(get_option('ICEPAY_Version', '1.0.0'), $this->version, '<'))
                     $this->upgrade($this->version);
+                
 
                 if (ICEPAY_Helper::isOldWooCommerce()) {
                     // WooCommerce 1.6.6 compatiblity
@@ -77,144 +94,134 @@ function ICEPAY_Init() {
                 // Ajax callback for getPaymentMethods
                 add_action('wp_ajax_ic_getpaymentmethods', array($this, 'getPaymentMethods'));
 
-                // Add scripts hook
+                // Add scripts
                 add_action('admin_enqueue_scripts', array($this, 'enqueueScripts'));
             }
-
-            // Create admin configuration form
-            $this->initForm();
-
-            // Initialise gateway settings
-            $this->init_settings();
-
-            // Core gateway is for configuration use only and should never be enabled
-            $this->enabled = false;
-
-            // Add postback URL to configuration form
-            $this->settings['postbackurl'] = sprintf('%s/index.php?page=icepayresult', get_option('siteurl'));
         }
 
         public function enqueueScripts() {
             // Add files only on ICEPAY's configuration page
             if (ICEPAY_helper::isIcepayPage($this->id)) {
-                wp_enqueue_script('icepay', '/wp-content/plugins/icepay-woocommerce-online-payment-module/assets/js/icepay.js', array('jquery'), '1.0');
+                wp_enqueue_script('icepay', '/wp-content/plugins/icepay-woocommerce-online-payment-module/assets/js/icepay.js', array('jquery'), '1.2');
                 wp_enqueue_style('icepay', '/wp-content/plugins/icepay-woocommerce-online-payment-module/assets/css/icepay.css', array(), '1.0');
+
+                wp_localize_script('icepay', 'objectL10n', array(
+                    'loading' => __('Loading paymentmethod data...', 'icepay'),
+                    'refresh' => __('Refresh Payment Methods', 'icepay')
+                ));
             }
         }
 
         public function result() {
             global $wpdb, $wp_version, $woocommerce;
 
-            if (isset($_GET['page']) && $_GET['page'] == 'icepayresult') {
-                if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+                $icepay = Icepay_Project_Helper::getInstance()->postback();
+                $icepay->setMerchantID($this->settings['merchantid'])
+                        ->setSecretCode($this->settings['secretcode'])
+                        ->doIPCheck(true);
 
-                    $icepay = Icepay_Project_Helper::getInstance()->postback();
-                    $icepay->setMerchantID($this->settings['merchantid'])
-                            ->setSecretCode($this->settings['secretcode'])
-                            ->doIPCheck(true);
+                if (!empty($this->settings['ipcheck'])) {
+                    $ipRanges = explode(",", $this->settings['ipcheck']);
 
-                    if (!empty($this->settings['ipcheck'])) {
-                        $ipRanges = explode(",", $this->settings['ipcheck']);
-
-                        foreach ($ipRanges as $ipRange) {
-                            $ip = explode("-", $ipRange);
-                            $icepay->setIPRange($ip[0], $ip[1]);
-                        }
+                    foreach ($ipRanges as $ipRange) {
+                        $ip = explode("-", $ipRange);
+                        $icepay->setIPRange($ip[0], $ip[1]);
                     }
+                }
 
-                    if ($icepay->validate()) {
-                        $data = $icepay->GetPostback();
+                if ($icepay->validate()) {
+                    $data = $icepay->GetPostback();
 
-                        $order_id = $data->orderID;
+                    $order_id = $data->orderID;
 
-                        $query = "SELECT * FROM `{$this->getTableWithPrefix('woocommerce_icepay_transactions')}` WHERE `id` = %d";
-                        $ic_order = $wpdb->get_row($wpdb->prepare($query, $order_id));
+                    $query = "SELECT * FROM `{$this->getTableWithPrefix('woocommerce_icepay_transactions')}` WHERE `id` = %d";
+                    $ic_order = $wpdb->get_row($wpdb->prepare($query, $order_id));
 
-                        $order = &new WC_Order($ic_order->order_id);
+                    $order = &new WC_Order($ic_order->order_id);
 
-                        if ($icepay->canUpdateStatus($ic_order->status)) {
-                            switch ($data->status) {
-                                case Icepay_StatusCode::ERROR:
-                                    $order->add_order_note($data->statusCode);
-                                    break;
-                                case Icepay_StatusCode::OPEN:
-                                case Icepay_StatusCode::AUTHORIZED:
-                                    $order->update_status('awaiting-payment');
-                                    break;
-                                case Icepay_StatusCode::SUCCESS:
-                                    $order->status = 'pending';
-                                    $order->payment_complete();
-                                    break;
-                                case Icepay_StatusCode::REFUND:
-                                    $order->update_status('cancelled');
-                                    $order->add_order_note($data->statusCode);
-                                    break;
-                                case Icepay_StatusCode::CHARGEBACK:
-                                    $order->update_status('cancelled');
-                                    $order->add_order_note($data->statusCode);
-                                    break;
-                            }
-
-                            $wpdb->update($this->getTableWithPrefix('woocommerce_icepay_transactions'), array('status' => $data->status, 'transaction_id' => $data->transactionID), array('id' => $order_id));
+                    if ($icepay->canUpdateStatus($ic_order->status)) {
+                        switch ($data->status) {
+                            case Icepay_StatusCode::ERROR:
+                                $order->add_order_note($data->statusCode);
+                                break;
+                            case Icepay_StatusCode::OPEN:
+                            case Icepay_StatusCode::AUTHORIZED:
+                                $order->update_status('awaiting-payment');
+                                break;
+                            case Icepay_StatusCode::SUCCESS:
+                                $order->status = 'pending';
+                                $order->payment_complete();
+                                break;
+                            case Icepay_StatusCode::REFUND:
+                                $order->update_status('cancelled');
+                                $order->add_order_note($data->statusCode);
+                                break;
+                            case Icepay_StatusCode::CHARGEBACK:
+                                $order->update_status('cancelled');
+                                $order->add_order_note($data->statusCode);
+                                break;
                         }
-                    } else {
-                        if ($icepay->isVersionCheck()) {
-                            $dump = array(
-                                "module" => sprintf("ICEPAY Woocommerce payment module version %s using PHP API version %s", ICEPAY_Helper::getVersion(), Icepay_Project_Helper::getInstance()->getReleaseVersion()), //<--- Module version and PHP API version
-                                "notice" => "Checksum validation passed!"
-                            );
 
-                            if ($icepay->validateVersion()) {
-                                $dump["additional"] = array(
-                                    "Wordpress" => $wp_version, // CMS name & version
-                                    "WooCommerce" => $woocommerce->version // Webshop name & version
-                                );
-                            } else {
-                                $dump["notice"] = "Checksum failed! Merchant ID and Secret code probably incorrect.";
-                            }
-                            var_dump($dump);
-                            exit();
-                        }
+                        $wpdb->update($this->getTableWithPrefix('woocommerce_icepay_transactions'), array('status' => $data->status, 'transaction_id' => $data->transactionID), array('id' => $order_id));
                     }
                 } else {
-                    $icepay = Icepay_Project_Helper::getInstance()->result();
+                    if ($icepay->isVersionCheck()) {
+                        $dump = array(
+                            "module" => sprintf("ICEPAY Woocommerce payment module version %s using PHP API version %s", ICEPAY_Helper::getVersion(), Icepay_Project_Helper::getInstance()->getReleaseVersion()), //<--- Module version and PHP API version
+                            "notice" => "Checksum validation passed!"
+                        );
 
-                    try {
-                        $icepay->setMerchantID($this->settings['merchantid'])
-                                ->setSecretCode($this->settings['secretcode']);
-                    } catch (Exception $e) {
-                        echo "Postback URL installed successfully.";
-                    }
-
-                    if ($icepay->validate()) {
-                        $order_id = $_GET['OrderID'];
-
-                        $query = "SELECT * FROM `{$this->getTableWithPrefix('woocommerce_icepay_transactions')}` WHERE `id` = %d";
-                        $ic_order = $wpdb->get_row($wpdb->prepare($query, $order_id));
-
-                        $order = &new WC_Order($ic_order->order_id);
-
-                        switch ($icepay->getStatus()) {
-                            case Icepay_StatusCode::ERROR:
-                                $order->add_order_note('User cancelled order.');
-                                $location = $order->get_cancel_order_url();
-                                wp_safe_redirect($location);
-                                exit();
-                                break;
-                            case Icepay_StatusCode::AUTHORIZED:
-                            case Icepay_StatusCode::OPEN:
-                            case Icepay_StatusCode::SUCCESS:
-                                $woocommerce->cart->empty_cart();
-
-                                $location = add_query_arg('key', $order->order_key, add_query_arg('order', $ic_order->order_id, get_permalink(woocommerce_get_page_id('thanks'))));
-                                wp_safe_redirect($location);
-                                exit();
-                                break;
+                        if ($icepay->validateVersion()) {
+                            $dump["additional"] = array(
+                                "Wordpress" => $wp_version, // CMS name & version
+                                "WooCommerce" => $woocommerce->version // Webshop name & version
+                            );
+                        } else {
+                            $dump["notice"] = "Checksum failed! Merchant ID and Secret code probably incorrect.";
                         }
+                        var_dump($dump);
+                        exit();
                     }
-
-                    exit();
                 }
+            } else {
+                $icepay = Icepay_Project_Helper::getInstance()->result();
+
+                try {
+                    $icepay->setMerchantID($this->settings['merchantid'])
+                            ->setSecretCode($this->settings['secretcode']);
+                } catch (Exception $e) {
+                    echo "Postback URL installed successfully.";
+                }
+
+                if ($icepay->validate()) {
+                    $order_id = $_GET['OrderID'];
+
+                    $query = "SELECT * FROM `{$this->getTableWithPrefix('woocommerce_icepay_transactions')}` WHERE `id` = %d";
+                    $ic_order = $wpdb->get_row($wpdb->prepare($query, $order_id));
+
+                    $order = &new WC_Order($ic_order->order_id);
+
+                    switch ($icepay->getStatus()) {
+                        case Icepay_StatusCode::ERROR:
+                            $order->add_order_note('User cancelled order.');
+                            $location = $order->get_cancel_order_url();
+                            wp_safe_redirect($location);
+                            exit();
+                            break;
+                        case Icepay_StatusCode::AUTHORIZED:
+                        case Icepay_StatusCode::OPEN:
+                        case Icepay_StatusCode::SUCCESS:
+                            $woocommerce->cart->empty_cart();
+
+                            $location = add_query_arg('key', $order->order_key, add_query_arg('order', $ic_order->order_id, get_permalink(woocommerce_get_page_id('thanks'))));
+                            wp_safe_redirect($location);
+                            exit();
+                            break;
+                    }
+                }
+
+                exit('Postback URL installed correctly.');
             }
         }
 
@@ -223,7 +230,7 @@ function ICEPAY_Init() {
 
             // SOAP Check          
             if (class_exists('SoapClient') === false) {
-                echo ICEPAY_Helper::generateAjaxError('SOAP extension for PHP must be enabled. Please contact your webhoster.');
+                echo ICEPAY_Helper::generateAjaxError(__('SOAP extension for PHP must be enabled. Please contact your webhoster.', 'icepay'));
                 die();
             }
 
@@ -258,7 +265,7 @@ function ICEPAY_Init() {
                         $i++;
                     }
                 } else {
-                    $html = ICEPAY_Helper::generateAjaxError('No active paymentmethods found for this merchant.');
+                    $html = ICEPAY_Helper::generateAjaxError(__('No active paymentmethods found for this merchant.', 'icepay'));
                 }
             } catch (Exception $e) {
                 $html = ICEPAY_Helper::generateAjaxError("An error occured: <b>{$e->getMessage()}</b>");
@@ -282,16 +289,21 @@ function ICEPAY_Init() {
 
             $variables = array(
                 '{image}' => plugins_url('', __FILE__) . '/assets/images/icepay-header.png',
-                '{version}' => $this->version,
+                '{version}' => sprintf('%s %s', __('Module Version', 'icepay'), $this->version),
                 '{manual}' => __('View the manual', 'icepay'),
                 '{website}' => __('Visit the ICEPAY website', 'icepay'),
                 '{settings}' => $settings,
                 '{configure_text}' => __('To configure your paymentmethods, press the paymentmethod above or in the top navigation.', 'icepay'),
+                '{refreshButtonValue}' => __('Refresh Payment Methods', 'icepay'),
                 '{error}' => '',
-                '{list}' => ''
+                '{list}' => '',
+                '{upgrade_notice}' => '',
             );
 
             ICEPAY_Helper::generateListItems($paymentMethods, $variables);
+
+            if (ICEPAY_Helper::isUpgradeNoticeAvailable())
+                ICEPAY_Helper::generateUpgradeNotice($variables);
 
             $template = file_get_contents(plugin_dir_path(__FILE__) . 'templates/admin.php');
 
@@ -398,9 +410,15 @@ function ICEPAY_Init() {
         }
 
         private function upgrade($version) {
+            global $wpdb;
+
             switch ($version) {
-                case '1.0.1':
-                    // Sample: Do stuff needed for 1.0.1
+                case '2.2.2':
+                    // Changing raw_pm_data from TEXT to LONGTEXT, some databases couldn't handle it
+                    $wpdb->query("ALTER TABLE `{$this->getTableWithPrefix('woocommerce_icepay_pmrawdata')}` CHANGE `raw_pm_data` `raw_pm_data` LONGTEXT NULL DEFAULT NULL");
+
+                    // Using the wc-api listener (woocommerce_api) hook since 2.2.2 to be more effectice and maintain WooCommerce standards
+                    ICEPAY_Helper::addUpgradeNotice(__('The postback URL has changed! Please copy the new postback URL and paste it into your ICEPAY account.', 'icepay'));
                     break;
             }
 
@@ -510,13 +528,14 @@ function ICEPAY_Init() {
 
             $variables = array(
                 '{image}' => plugins_url('', __FILE__) . '/assets/images/icepay-header.png',
-                '{version}' => ICEPAY_Helper::getVersion(),
+                '{version}' => sprintf('%s %s', __('Module Version', 'icepay'), ICEPAY_Helper::getVersion()),
                 '{manual}' => __('View the manual', 'icepay'),
                 '{website}' => __('Visit the ICEPAY website', 'icepay'),
                 '{settings}' => $settings,
                 '{configure_text}' => '',
                 '{error}' => '',
-                '{list}' => ''
+                '{list}' => '',
+                '{upgrade_notice}' => ''
             );
 
             $template = file_get_contents(plugin_dir_path(__FILE__) . 'templates/admin.php');
