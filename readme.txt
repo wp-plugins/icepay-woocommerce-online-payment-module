@@ -143,7 +143,6 @@ Visit our website for more information about this plugin, our accounts, and the 
 == Upgrade Notice ==
 = 2.2.2 =
 = 2.2.1 =
-= 2.2.2 =
 IMPORTANT: The postback URL has changed! Please copy the new postback URL and paste it into your ICEPAY account. 
 
 We recommend you test the plugin on a test environment before deploying it on a live website.
