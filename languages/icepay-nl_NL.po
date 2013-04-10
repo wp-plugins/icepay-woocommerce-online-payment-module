@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Woocommerce Icepay\n"
 "POT-Creation-Date: 2013-04-02 10:55+0100\n"
-"PO-Revision-Date: 2013-04-02 10:55+0100\n"
+"PO-Revision-Date: 2013-04-04 12:38+0100\n"
 "Last-Translator: Wouter van Tilburg <wouter@icepay.eu>\n"
 "Language-Team: Wouter van Tilburg <wouter@icepay.eu>\n"
 "Language: Dutch\n"
@@ -87,7 +87,7 @@ msgstr "Kopieer de Secret cide van uw ICEPAY account."
 
 #: ../icepay.php:357
 msgid "(Optional) Description on transaction statement of customer"
-msgstr "(Niet verplicht) Beschrijving van de transactie"
+msgstr "Beschrijving van de transactie"
 
 #: ../icepay.php:360
 msgid ""
@@ -100,7 +100,7 @@ msgstr ""
 
 #: ../icepay.php:363
 msgid "(Optional) Custom IP Range for IP Check for Postback"
-msgstr "(Niet verplicht) Handmatige IP Range voor IP Check op de Postback"
+msgstr "Handmatige IP Range voor IP Check op de Postback"
 
 #: ../icepay.php:366
 msgid ""

@@ -1197,7 +1197,6 @@ class Icepay_Api_Logger {
         if ($this->_logToFile) {
             $file = $this->_loggingDirectory . DS . $this->_loggingFile;
 
-            echo $file;
             try {
                 $fp = fopen($file, "a");
                 fwrite($fp, $line);

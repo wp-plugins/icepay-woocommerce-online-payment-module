@@ -525,8 +525,6 @@ class Icepay_Basicmode extends Icepay_Api_Base {
      * @return string
      */
     protected function prepareParameters() {
-        var_dump($this->data);
-
         return http_build_query($this->data, '', '&');
     }
 

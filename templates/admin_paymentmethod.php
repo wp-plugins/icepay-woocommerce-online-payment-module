@@ -6,22 +6,8 @@
     </div>
 </div>
 
-<div id="icepay-container">
-    {upgrade_notice}
-    
+<div id="icepay-payment-container">
     <table class="icepay-settings">
-        {settings}
-
-        <ul id='icepay-paymentmethod-list'> 
-            {list}
-        </ul>
-
-        {error}
-
-        <noscript>
-            <div class='error ic_getpaymentmethods_error'>Javascript must be enabled in your browser in order to fetch paymentmethods.</div>
-        </noscript> 
-
-        <i>{configure_text}</i>
-    </table>
+        {settings}      
+    </table>    
 </div>

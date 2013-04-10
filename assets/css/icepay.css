@@ -1,11 +1,12 @@
 
 input#ic_refreshpaymentmethods {
-    margin: 20px;
+    margin-left: 20px;
 }
 
 input.ic-input {
-    padding: 5px;
+    padding: 5px !important;
     width: 300px;
+    margin: 0px !important;
 }
 
 div#icepay-header {
@@ -25,14 +26,42 @@ div#icepay-header-info a {
 
 ul#icepay-paymentmethod-list {
     list-style-type: disc; 
-    margin-left: 40px; 
-    margin-top: -20px;
+    margin-left: 40px;
 }
 
 div.ic_getpaymentmethods_error {
     padding: 5px; 
     font-weight: bold; 
-    margin: -20px 0px 10px 0px; 
+    margin: 0 !important;
     color: Red; 
     padding: 5px;
+}
+
+div#icepay-container {
+    background-color: #F2F2F2;
+    padding: 15px 10px 10px 10px;
+    background-image: url('../images/icepay-logo-bg.png');
+    background-repeat: no-repeat;
+    background-position: center right;
+    min-height: 550px;
+}
+
+div#icepay-payment-container {
+    background-color: #F2F2F2;
+    padding: 0px 10px 10px 10px;
+}
+
+h4 {
+    color: #00004A;
+    border-bottom: 1px solid #CFCFCF;
+    padding-bottom: 5px;
+    width: 800px;
+}
+
+th {
+    width: 300px !important;
+}
+
+.icepay-postback-url {
+    background-color: #FFF !important;
 }

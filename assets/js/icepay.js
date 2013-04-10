@@ -5,8 +5,10 @@ jQuery(function() {
         });
 
         var button = '<input id="ic_refreshpaymentmethods" type="submit" value="'+objectL10n.refresh+'" class="button" />';                
-        $('.icpaymentmethods').append(button);
-
+        $('.icpaymentmethods').append(button);     
+        
+        $('.icepay-postback-url').attr('readonly', 'readonly');
+        
         $('#ic_refreshpaymentmethods').click(function(e){
             e.preventDefault();
 

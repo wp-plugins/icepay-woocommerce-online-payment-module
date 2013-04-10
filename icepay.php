@@ -23,9 +23,8 @@
  * Description: Enables ICEPAY Plugin within Woocommerce
  * Author: ICEPAY
  * Author URI: http://www.icepay.com
- * Version: 2.2.2
+ * Version: 2.2.3
  */
-
 // Launch ICEPAY when active plugins and pluggable functions are loaded
 add_action('plugins_loaded', 'ICEPAY_Init');
 
@@ -35,7 +34,7 @@ require(realpath(dirname(__FILE__)) . '/classes/helper.php');
 function ICEPAY_Init() {
     if (!class_exists('WC_Payment_Gateway'))
         return;
-    
+
     class ICEPAY extends WC_Payment_Gateway {
 
         public function __construct() {
@@ -77,11 +76,18 @@ function ICEPAY_Init() {
                 // Run install if false - not using install hook to make sure people who upgrade get the correct tables installed (Upgrade function was added later)
                 if (!get_option('ICEPAY_Installed', false))
                     $this->install();
-
-                // Run upgrade if new version
-                if (version_compare(get_option('ICEPAY_Version', '1.0.0'), $this->version, '<'))
-                    $this->upgrade($this->version);
+                                
+                // Run upgrade if needed
+                $upgradeRequired = array('2.2.2');
                 
+                $currentVersion = get_option('ICEPAY_Version', '1.0.0');
+                
+                foreach ($upgradeRequired as $version) {
+                    if (version_compare($currentVersion, $version, '<'))
+                        $this->upgrade($version);
+                }
+                
+                update_option('ICEPAY_VERSION', $this->version);              
 
                 if (ICEPAY_Helper::isOldWooCommerce()) {
                     // WooCommerce 1.6.6 compatiblity
@@ -104,7 +110,7 @@ function ICEPAY_Init() {
             if (ICEPAY_helper::isIcepayPage($this->id)) {
                 wp_enqueue_script('icepay', '/wp-content/plugins/icepay-woocommerce-online-payment-module/assets/js/icepay.js', array('jquery'), '1.2');
                 wp_enqueue_style('icepay', '/wp-content/plugins/icepay-woocommerce-online-payment-module/assets/css/icepay.css', array(), '1.0');
-
+                
                 wp_localize_script('icepay', 'objectL10n', array(
                     'loading' => __('Loading paymentmethod data...', 'icepay'),
                     'refresh' => __('Refresh Payment Methods', 'icepay')
@@ -121,14 +127,8 @@ function ICEPAY_Init() {
                         ->setSecretCode($this->settings['secretcode'])
                         ->doIPCheck(true);
 
-                if (!empty($this->settings['ipcheck'])) {
-                    $ipRanges = explode(",", $this->settings['ipcheck']);
-
-                    foreach ($ipRanges as $ipRange) {
-                        $ip = explode("-", $ipRange);
-                        $icepay->setIPRange($ip[0], $ip[1]);
-                    }
-                }
+                if (!empty($this->settings['ipcheck']))
+                    $icepay->addToWhitelist($this->settings['ipcheck']);
 
                 if ($icepay->validate()) {
                     $data = $icepay->GetPostback();
@@ -154,7 +154,7 @@ function ICEPAY_Init() {
                                 $order->payment_complete();
                                 break;
                             case Icepay_StatusCode::REFUND:
-                                $order->update_status('cancelled');
+                                $order->update_status('refunded');
                                 $order->add_order_note($data->statusCode);
                                 break;
                             case Icepay_StatusCode::CHARGEBACK:
@@ -238,21 +238,21 @@ function ICEPAY_Init() {
                 $paymentService = Icepay_Api_Webservice::getInstance()->paymentMethodService();
                 $paymentService->setMerchantID($this->settings['merchantid'])
                         ->setSecretCOde($this->settings['secretcode']);
-
+                
                 $paymentMethods = $paymentService->retrieveAllPaymentmethods()->asArray();
 
                 $pmInfoTable = $this->getTableWithPrefix('woocommerce_icepay_pminfo');
                 $pmRawDataTable = $this->getTableWithPrefix('woocommerce_icepay_pmrawdata');
-
+                
                 // Clear old raw paymentdata in database
                 $wpdb->query("TRUNCATE `{$pmRawDataTable}`");
-
+                
                 // Clear old pminfo data in database
                 $wpdb->query("TRUNCATE `{$pmInfoTable}`");
-
+                
                 // Store new raw paymentdata in database
                 $wpdb->insert($pmRawDataTable, array('raw_pm_data' => serialize($paymentMethods)));
-
+                
                 if ($paymentMethods > 0) {
                     $i = 1;
                     $html = '';
@@ -359,19 +359,25 @@ function ICEPAY_Init() {
                     'description' => __('Copy the Secret Code from your ICEPAY account.', 'icepay'),
                     'desc_tip' => true
                 ),
+                'steptwo' => array(
+                    'title' => __('Optional configuration', 'icepay'),
+                    'type' => 'title'
+                ),
                 'descriptiontransaction' => array(
                     'title' => __('(Optional) Description on transaction statement of customer', 'icepay'),
                     'type' => 'text',
                     'class' => 'ic-input',
                     'description' => __('Some payment methods allow customized descriptions on the transaction statement. If left empty the Order ID is used. (Max 100 char.)', 'icepay'),
+                    'desc_tip' => true
                 ),
                 'ipcheck' => array(
                     'title' => __('(Optional) Custom IP Range for IP Check for Postback', 'icepay'),
                     'type' => 'text',
                     'class' => 'ic-input',
                     'description' => __('For example a proxy: 1.222.333.444-100.222.333.444 For multiple ranges use a , seperator: 2.2.2.2-5.5.5.5,8.8.8.8-9.9.9.9', 'icepay'),
+                    'desc_tip' => true
                 ),
-                'steptwo' => array(
+                'stepthree' => array(
                     'title' => __('PaymentMethods', 'icepay'),
                     'type' => 'title',
                     'class' => 'icpaymentmethods'
@@ -403,7 +409,7 @@ function ICEPAY_Init() {
 
             // Install ICEPAY's pmrawdata table
             $wpdb->query("CREATE TABLE IF NOT EXISTS `{$this->getTableWithPrefix('woocommerce_icepay_pmrawdata')}` (
-                `raw_pm_data` TEXT
+                `raw_pm_data` LONGTEXT
             )");
 
             update_option('ICEPAY_Installed', true);
@@ -420,9 +426,7 @@ function ICEPAY_Init() {
                     // Using the wc-api listener (woocommerce_api) hook since 2.2.2 to be more effectice and maintain WooCommerce standards
                     ICEPAY_Helper::addUpgradeNotice(__('The postback URL has changed! Please copy the new postback URL and paste it into your ICEPAY account.', 'icepay'));
                     break;
-            }
-
-            update_option('ICEPAY_VERSION', $this->version);
+            }            
         }
 
         private function getTableWithPrefix($tableName) {
@@ -460,18 +464,23 @@ function ICEPAY_Init() {
                 'enabled' => array(
                     'title' => __('Active', 'icepay'),
                     'type' => 'checkbox',
-                    'label' => ' '
+                    'label' => ' ',
+                    'description' => __('Enable or disable the payment method during the checkout process', 'icepay'),
+                    'desc_tip' => true
                 ),
                 'displayname' => array(
                     'title' => __('Displayname', 'icepay'),
                     'type' => 'text',
+                    'class' => 'ic-input',
                     'description' => __('Name that will be displayed during the checkout.', 'icepay'),
-                    'css' => 'width: 300px;',
                     'desc_tip' => true
                 )
             );
 
             $this->init_settings();
+            
+            if (empty($this->settings['displayname']))
+                $this->settings['displayname'] = $paymentMethod->pm_name;
 
             $this->title = (ICEPAY_Helper::isOldWooCommerce()) ? $this->settings['displayname'] : $this->get_option('displayname');
 
@@ -488,7 +497,7 @@ function ICEPAY_Init() {
                 $issuers = $pMethod->getIssuers();
 
                 $output = sprintf("<input type='hidden' name='paymentMethod' value='%s' />", $paymentMethod->pm_code);
-
+                
                 $image = sprintf("%s/assets/images/%s.png", plugins_url('', __FILE__), strtolower($paymentMethod->pm_code));
                 $output .= "<img src='{$image}' />";
 
@@ -515,7 +524,7 @@ function ICEPAY_Init() {
 
                     $output .= '</select>';
                 }
-
+                
                 $this->description = $output;
             }
         }
@@ -531,14 +540,10 @@ function ICEPAY_Init() {
                 '{version}' => sprintf('%s %s', __('Module Version', 'icepay'), ICEPAY_Helper::getVersion()),
                 '{manual}' => __('View the manual', 'icepay'),
                 '{website}' => __('Visit the ICEPAY website', 'icepay'),
-                '{settings}' => $settings,
-                '{configure_text}' => '',
-                '{error}' => '',
-                '{list}' => '',
-                '{upgrade_notice}' => ''
+                '{settings}' => $settings
             );
 
-            $template = file_get_contents(plugin_dir_path(__FILE__) . 'templates/admin.php');
+            $template = file_get_contents(plugin_dir_path(__FILE__) . 'templates/admin_paymentmethod.php');
 
             foreach ($variables as $key => $value) {
                 $template = str_replace($key, $value, $template);
@@ -646,11 +651,13 @@ function ICEPAY_Init() {
                                     ->setCity($order->shipping_city)
                                     ->setCountry($order->shipping_country)
                     );
-
+             
                     // Shipping                
-                    if ($order->order_shipping != '0.00') {
+                    if ($order->order_shipping != '0.00') {                        
                         $taxRate = (int) (string) ($order->order_shipping_tax / $order->order_shipping * 100);
-                        Icepay_Order::getInstance()->setShippingCosts($order->order_shipping * 100, $taxRate);
+                        $taxAmount = (int) (string) ($order->order_shipping_tax * 100);
+                        $shippingCosts = ((int)(string) ($order->order_shipping * 100)) + $taxAmount;
+                        Icepay_Order::getInstance()->setShippingCosts($shippingCosts, $taxRate);
                     }
 
                     // Discount            
