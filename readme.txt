@@ -86,7 +86,7 @@ Visit our website for more information about this plugin, our accounts, and the 
 4. The ICEPAY WordPress WooCommerce Online Payment plugin allows you to offer the most frequently used national and international online payment methods including iDeal, Giropay, PayPal, MrCash/Bancontact, Sofortbanking, text/sms payments, phone payments, Creditcard, Visa, MasterCard, American Express, Diners Club International, Maestro International, JCB, Laser, Carte Bleue, Dankort, CartaSi and Debit cards.
 
 == Changelog ==
-= 2.2.4=
+= 2.2.4 =
 * Description is now correctly showing in the ICEPAY order again
 
 = 2.2.3 =
