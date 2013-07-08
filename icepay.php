@@ -23,7 +23,7 @@
  * Description: Enables ICEPAY Plugin within Woocommerce
  * Author: ICEPAY
  * Author URI: http://www.icepay.com
- * Version: 2.2.3
+ * Version: 2.2.4
  */
 // Launch ICEPAY when active plugins and pluggable functions are loaded
 add_action('plugins_loaded', 'ICEPAY_Init');
@@ -700,7 +700,7 @@ function ICEPAY_Init() {
                     $issuer = 'DEFAULT';
                 }
 
-                $description = !empty($this->settings['descriptiontransaction']) ? $this->settings['descriptiontransaction'] : null;
+                $description = !empty($this->iceCoreSettings['descriptiontransaction']) ? $this->iceCoreSettings['descriptiontransaction'] : null;
 
                 // Add transaction to ICEPAY table
                 $wpdb->insert($this->getTableWithPrefix('woocommerce_icepay_transactions'), array('order_id' => $order_id, 'status' => Icepay_StatusCode::OPEN, 'transaction_id' => NULL));
