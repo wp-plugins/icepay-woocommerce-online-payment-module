@@ -1,14 +1,14 @@
 <?php
 
 ########################################################################
-#                                                             	       #
+#                                                             	      #
 #           The property of ICEPAY www.icepay.com                      #
-#                                                             	       #
+#                                                             	      #
 #       The merchant is entitled to change de ICEPAY plug-in           #
 #       code, any changes will be at merchant's own risk.	       #
 #	Requesting ICEPAY support for a modified plug-in will be       #
 #	charged in accordance with the standard ICEPAY tariffs.	       #
-#                                                             	       #
+#                                                             	      #
 ########################################################################
 
 /**
@@ -23,7 +23,7 @@
  * Description: Enables ICEPAY Plugin within Woocommerce
  * Author: ICEPAY
  * Author URI: http://www.icepay.com
- * Version: 2.2.4
+ * Version: 2.2.5
  */
 // Launch ICEPAY when active plugins and pluggable functions are loaded
 add_action('plugins_loaded', 'ICEPAY_Init');
@@ -138,7 +138,7 @@ function ICEPAY_Init() {
                     $query = "SELECT * FROM `{$this->getTableWithPrefix('woocommerce_icepay_transactions')}` WHERE `id` = %d";
                     $ic_order = $wpdb->get_row($wpdb->prepare($query, $order_id));
 
-                    $order = &new WC_Order($ic_order->order_id);
+                    $order = new WC_Order($ic_order->order_id);
 
                     if ($icepay->canUpdateStatus($ic_order->status)) {
                         switch ($data->status) {
@@ -200,7 +200,7 @@ function ICEPAY_Init() {
                     $query = "SELECT * FROM `{$this->getTableWithPrefix('woocommerce_icepay_transactions')}` WHERE `id` = %d";
                     $ic_order = $wpdb->get_row($wpdb->prepare($query, $order_id));
 
-                    $order = &new WC_Order($ic_order->order_id);
+                    $order = new WC_Order($ic_order->order_id);
 
                     switch ($icepay->getStatus()) {
                         case Icepay_StatusCode::ERROR:
@@ -580,38 +580,41 @@ function ICEPAY_Init() {
                                     ->setEmail($order->billing_email)
                                     ->setPhone($order->billing_phone)
                     );
-
+                       
                     // Add Products                
-                    foreach ($order->get_items() as $product) {
-                        $pricePerProduct = $product['line_total'] / $product['qty'];
+                    foreach ($order->get_items() as $item) {
+                        $product = $order->get_product_from_item( $item );
+                        
+                        $pricePerProduct = $item['line_total'] / $item['qty'];
 
-                        $taxRateMultiplier = round(($product['line_tax'] / $product['line_total']) + 1, 2);
-                        $taxRatePercentage = round($product['line_tax'] / $product['line_total'] * 100, 2);
+                        $taxRateMultiplier = round(($item['line_tax'] / $item['line_total']) + 1, 2);
+                        $taxRatePercentage = round($item['line_tax'] / $item['line_total'] * 100, 2);
 
                         $price = round($pricePerProduct * $taxRateMultiplier, 2) * 100;
 
+                        
                         Icepay_Order::getInstance()
                                 ->addProduct(Icepay_Order_Product::create()
-                                        ->setProductID($product['id'])
-                                        ->setProductName($product['name'])
-                                        ->setDescription($product['name'])
-                                        ->setQuantity($product['qty'])
+                                        ->setProductID($product->id)
+                                        ->setProductName($product->post->post_title)
+                                        ->setDescription($product->post->post_title)
+                                        ->setQuantity($item['qty'])
                                         ->setUnitPrice($price)
                                         ->setVATCategory(Icepay_Order_VAT::getCategoryForPercentage($taxRatePercentage))
                         );
 
                         // WooCommerce calculates taxes per row instead of per unit price
                         // Sadly need to make an tax correction for Afterpay untill WooCommerce has tax calculation based on unit price.
-                        $totalPriceTaxPerRow = ($product['line_tax'] + $product['line_total']) * 100;
-                        $totalPriceTaxPerUnit = $price * $product['qty'];
+                        $totalPriceTaxPerRow = ($item['line_tax'] + $item['line_total']) * 100;
+                        $totalPriceTaxPerUnit = $price * $item['qty'];
 
                         $taxDifference = (int) (string) ($totalPriceTaxPerRow - $totalPriceTaxPerUnit);
 
                         if ($taxDifference == -1) {
                             Icepay_Order::getInstance()
                                     ->addProduct(Icepay_Order_Product::create()
-                                            ->setProductID($product['id'])
-                                            ->setProductName($product['name'])
+                                            ->setProductID($product->id)
+                                            ->setProductName($item['name'])
                                             ->setDescription('BTW Correctie')
                                             ->setQuantity('1')
                                             ->setUnitPrice($taxDifference)
@@ -735,7 +738,7 @@ function ICEPAY_Init() {
 
                 $woocommerce->add_error(__('Payment error:', 'woothemes') . ' ' . $message);
 
-                $order = &new WC_Order($orderID);
+                $order = new WC_Order($orderID);
                 $order->add_order_note("Customer tried to make an attempt to complete the order but an error occured: {$message}");
 
                 return false;

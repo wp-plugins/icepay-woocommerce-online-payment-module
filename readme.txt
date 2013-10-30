@@ -4,7 +4,7 @@ Donate link: http://www.icepay.com
 Tags: ICEPAY, Online Payment Plugin, WooCommerce, Payment Service Provider, Online payments, online transaction, secure payments, internet payment solution, secure payment processing, iDeal, Giropay, sofortbanking, text sms payments, phone payments, Creditcard, Visa, MasterCard, American Express, Diners Club International, Maestro International, JCB, Laser, Carte Bleue, Dankort, CartaSi, Debit cards, full-service provider, local service, global payments
 Requires at least: 3.0.1
 Tested up to: 3.5
-Stable tag: 2.2.4
+Stable tag: 2.2.5
 License: GNU GENERAL PUBLIC LICENSE - Version 3, 29 June 2007
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -86,6 +86,11 @@ Visit our website for more information about this plugin, our accounts, and the 
 4. The ICEPAY WordPress WooCommerce Online Payment plugin allows you to offer the most frequently used national and international online payment methods including iDeal, Giropay, PayPal, MrCash/Bancontact, Sofortbanking, text/sms payments, phone payments, Creditcard, Visa, MasterCard, American Express, Diners Club International, Maestro International, JCB, Laser, Carte Bleue, Dankort, CartaSi and Debit cards.
 
 == Changelog ==
+= 2.2.5 =
+* Fixed deprecated warnings
+* Fixed Afterpay issue causing the product id to be empty
+* We recommend you test the plugin on a test environment before deploying it on a live website.
+
 = 2.2.4 =
 * Description is now correctly showing in the ICEPAY order again
 
@@ -153,6 +158,10 @@ Visit our website for more information about this plugin, our accounts, and the 
 * Initial release - Release date: 15 october 2012
 
 == Upgrade Notice ==
+= 2.2.4 =
+= 2.2.5 =
+We recommend you test the plugin on a test environment before deploying it on a live website.
+
 = 2.2.2 =
 = 2.2.1 =
 IMPORTANT: The postback URL has changed! Please copy the new postback URL and paste it into your ICEPAY account. 
