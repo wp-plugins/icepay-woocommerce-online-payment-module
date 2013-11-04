@@ -23,7 +23,7 @@
  * Description: Enables ICEPAY Plugin within Woocommerce
  * Author: ICEPAY
  * Author URI: http://www.icepay.com
- * Version: 2.2.5
+ * Version: 2.2.6
  */
 // Launch ICEPAY when active plugins and pluggable functions are loaded
 add_action('plugins_loaded', 'ICEPAY_Init');
@@ -396,7 +396,7 @@ function ICEPAY_Init() {
                 `id` int(11) NOT NULL AUTO_INCREMENT,
                 `order_id` int(11) NOT NULL,
                 `status` varchar(255) NOT NULL,
-                `transaction_id` int(11) DEFAULT NULL,
+                `transaction_id` varchar(255) DEFAULT NULL,
                 PRIMARY KEY (`id`)
             )");
 
@@ -596,8 +596,8 @@ function ICEPAY_Init() {
                         Icepay_Order::getInstance()
                                 ->addProduct(Icepay_Order_Product::create()
                                         ->setProductID($product->id)
-                                        ->setProductName($product->post->post_title)
-                                        ->setDescription($product->post->post_title)
+                                        ->setProductName(htmlentities($product->post->post_title))
+                                        ->setDescription(htmlentities($product->post->post_title))
                                         ->setQuantity($item['qty'])
                                         ->setUnitPrice($price)
                                         ->setVATCategory(Icepay_Order_VAT::getCategoryForPercentage($taxRatePercentage))
@@ -610,11 +610,11 @@ function ICEPAY_Init() {
 
                         $taxDifference = (int) (string) ($totalPriceTaxPerRow - $totalPriceTaxPerUnit);
 
-                        if ($taxDifference == -1) {
+                        if ($taxDifference < 10) {
                             Icepay_Order::getInstance()
                                     ->addProduct(Icepay_Order_Product::create()
                                             ->setProductID($product->id)
-                                            ->setProductName($item['name'])
+                                            ->setProductName(htmlentities($product->post->post_title))
                                             ->setDescription('BTW Correctie')
                                             ->setQuantity('1')
                                             ->setUnitPrice($taxDifference)
