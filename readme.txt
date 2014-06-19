@@ -85,9 +85,14 @@ Visit our website for more information about this plugin, our accounts, and the 
 3. Control the default online payment method for your WordPress WooCommerce webshop.
 4. The ICEPAY WordPress WooCommerce Online Payment plugin allows you to offer the most frequently used national and international online payment methods including iDeal, Giropay, PayPal, MrCash/Bancontact, Sofortbanking, text/sms payments, phone payments, Creditcard, Visa, MasterCard, American Express, Diners Club International, Maestro International, JCB, Laser, Carte Bleue, Dankort, CartaSi and Debit cards.
 
-== Changelog ===2.2.9 =
-* Redirect pages fixed for newer Woocommerce versions* 2.2.8 =
+== Changelog ==
+
+= 2.2.9 =
+* Redirect pages fixed for newer Woocommerce versions
+
+= 2.2.8 =
 * compatibility with newer WordPress versions* corrected Frisland Bank in iDeal checkout 
+
 = 2.2.6 = 
 * Fixed special html chars in product name/description crashes for Afterpay
 
