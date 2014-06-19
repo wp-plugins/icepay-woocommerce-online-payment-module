@@ -1,4 +1,4 @@
-msgid ""
+﻿msgid ""
 msgstr ""
 "Project-Id-Version: Woocommerce Icepay\n"
 "POT-Creation-Date: 2013-04-02 10:55+0100\n"
@@ -161,7 +161,7 @@ msgstr "ASN Bank"
 
 #: ../icepay.php:495
 msgid "FRIESLAND"
-msgstr "Frieslandse bank"
+msgstr "Friesland bank"
 
 #: ../icepay.php:496
 msgid "ING"

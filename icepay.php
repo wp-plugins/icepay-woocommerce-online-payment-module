@@ -14,16 +14,15 @@
 /**
  * ICEPAY Woocommerce payment module
  * 
- * @author Wouter van Tilburg <wouter@icepay.eu>
  * @license http://opensource.org/licenses/GPL-3.0 GNU General Public License, version 3 (GPL-3.0)
- * @copyright Copyright (c) 2013 ICEPAY B.V.
+ * @copyright Copyright (c) 2014 ICEPAY B.V.
  *
  * Plugin Name: ICEPAY Plugin for Woocommerce
  * Plugin URI: http://www.icepay.com/webshop-modules/online-payments-for-wordpress-woocommerce
  * Description: Enables ICEPAY Plugin within Woocommerce
  * Author: ICEPAY
  * Author URI: http://www.icepay.com
- * Version: 2.2.7
+ * Version: 2.2.9
  */
 // Launch ICEPAY when active plugins and pluggable functions are loaded
 add_action('plugins_loaded', 'ICEPAY_Init');
@@ -214,8 +213,8 @@ function ICEPAY_Init() {
                         case Icepay_StatusCode::SUCCESS:
                             $woocommerce->cart->empty_cart();
 
-                            $location = add_query_arg('key', $order->order_key, add_query_arg('order', $ic_order->order_id, get_permalink(woocommerce_get_page_id('thanks'))));
-                            wp_safe_redirect($location);
+                            $location = add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('thanks'))."order-received/".$ic_order->order_id."/");
+							wp_safe_redirect($location);
                             exit();
                             break;
                     }

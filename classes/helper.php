@@ -2,7 +2,7 @@
 
 class ICEPAY_Helper {
     
-    private static $version = '2.2.6';
+    private static $version = '2.2.8';
     
     public static function generateListItems($paymentMethods, &$variables) {
         if ($paymentMethods) {
@@ -47,7 +47,7 @@ class ICEPAY_Helper {
                 return true;
             }
         } else {
-            if (isset($_GET['section']) && (strpos($_GET['section'], $id) !== false))
+            if (isset($_GET['section']) && (stripos($_GET['section'], $id) !== false))
                 return true;
         }
         
