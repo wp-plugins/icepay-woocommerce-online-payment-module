@@ -88,7 +88,7 @@ Visit our website for more information about this plugin, our accounts, and the 
 == Changelog ==
 
 = 2.2.9 =
-* Redirect pages fixed for newer Woocommerce versions*
+* Redirect pages fixed for newer Woocommerce versions
 
 = 2.2.8 =
 * compatibility with newer WordPress versions* corrected Frisland Bank in iDeal checkout
