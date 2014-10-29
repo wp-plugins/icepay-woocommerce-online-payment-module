@@ -22,7 +22,7 @@
  * Description: Enables ICEPAY Plugin within Woocommerce
  * Author: ICEPAY
  * Author URI: http://www.icepay.com
- * Version: 2.2.9
+ * Version: 2.2.10
  */
 // Launch ICEPAY when active plugins and pluggable functions are loaded
 add_action('plugins_loaded', 'ICEPAY_Init');
@@ -146,7 +146,8 @@ function ICEPAY_Init() {
                                 break;
                             case Icepay_StatusCode::OPEN:
                             case Icepay_StatusCode::AUTHORIZED:
-                                $order->update_status('awaiting-payment');
+								$order->status = 'pending';
+ //                               $order->update_status('awaiting-payment');
                                 break;
                             case Icepay_StatusCode::SUCCESS:
                                 $order->status = 'pending';
