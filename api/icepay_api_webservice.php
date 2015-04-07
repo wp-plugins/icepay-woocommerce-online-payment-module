@@ -3,7 +3,7 @@
 /**
  *  ICEPAY API
  *
- *  @version 2.2.0
+ *  @version 2.4.0
  *  @author Olaf Abbenhuis
  *  @author Wouter van Tilburg
  *  @copyright Copyright (c) 2012, ICEPAY
@@ -11,7 +11,7 @@
  */
 // Define constants
 if (!defined('DIR')) {
-    define("DIR", dirname(__FILE__));
+    define("DIR", realpath(dirname(__FILE__)));
 }
 
 if (!defined('DS')) {
@@ -32,9 +32,10 @@ class Icepay_Api_Webservice extends Icepay_Api_Base {
     private $_service_pay;
     private $_service_paymentMethods;
     private $_service_refunds;
+    private $_service_autoCapture;
     private $_filtering;
     private $_single;
-    protected $version = "1.0.0";
+    protected $version = "1.1.0";
 
     /**
      * Create an instance
@@ -43,10 +44,25 @@ class Icepay_Api_Webservice extends Icepay_Api_Base {
      * @access public
      * @return instance of self
      */
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (!self::$instance)
             self::$instance = new self();
         return self::$instance;
+    }
+
+    /**
+     * Returns class or creates the Auto Capture class
+     * 
+     * @since 2.4.0
+     * @access public
+     * @return type
+     */
+    public function autoCaptureService()
+    {
+        if (!$this->_service_autoCapture)
+            $this->_service_autoCapture = new Icepay_Webservice_AutoCapture();
+        return $this->_service_autoCapture;
     }
 
     /**
@@ -56,7 +72,8 @@ class Icepay_Api_Webservice extends Icepay_Api_Base {
      * @access public
      * @return object
      */
-    public function paymentMethodService() {
+    public function paymentMethodService()
+    {
         if (!$this->_service_paymentMethods)
             $this->_service_paymentMethods = new Icepay_Webservice_Paymentmethods();
         return $this->_service_paymentMethods;
@@ -69,7 +86,8 @@ class Icepay_Api_Webservice extends Icepay_Api_Base {
      * @access public
      * @return object
      */
-    public function filtering() {
+    public function filtering()
+    {
         if (!$this->_filtering)
             $this->_filtering = new Icepay_Webservice_Filtering();
         return $this->_filtering;
@@ -82,7 +100,8 @@ class Icepay_Api_Webservice extends Icepay_Api_Base {
      * @access public
      * @return object
      */
-    public function singleMethod() {
+    public function singleMethod()
+    {
         if (!$this->_single)
             $this->_single = new Icepay_Webservice_Paymentmethod();
         return $this->_single;
@@ -95,7 +114,8 @@ class Icepay_Api_Webservice extends Icepay_Api_Base {
      * @access public
      * @return object
      */
-    public function paymentService() {
+    public function paymentService()
+    {
         if (!$this->_service_pay)
             $this->_service_pay = new Icepay_Webservice_Pay();
         return $this->_service_pay;
@@ -108,7 +128,8 @@ class Icepay_Api_Webservice extends Icepay_Api_Base {
      * @access public
      * @return object
      */
-    public function reportingService() {
+    public function reportingService()
+    {
         if (!$this->_service_reporting)
             $this->_service_reporting = new Icepay_Webservice_Reporting();
         return $this->_service_reporting;
@@ -121,7 +142,8 @@ class Icepay_Api_Webservice extends Icepay_Api_Base {
      * @access public
      * @return object
      */
-    public function refundService() {
+    public function refundService()
+    {
         if (!$this->_service_refunds)
             $this->_service_refunds = new Icepay_Webservice_Refunds();
         return $this->_service_refunds;
@@ -144,18 +166,18 @@ class Icepay_Webservice_Base extends Icepay_Api_Base {
      * @access public
      * @return \Icepay_Webservice_Base 
      */
-    public function setupClient() {
+    public function setupClient()
+    {
         /* Return if already set */
         if ($this->client)
             return $this;
 
         /* Start a new client */
         $this->client = new SoapClient(
-                        $this->service,
-                        array(
-                            "location" => $this->service,
-                            'cache_wsdl' => 'WSDL_CACHE_NONE'
-                        )
+                $this->service, array(
+            "location" => $this->service,
+            'cache_wsdl' => 'WSDL_CACHE_NONE'
+                )
         );
 
         /* Client configuration */
@@ -171,7 +193,8 @@ class Icepay_Webservice_Base extends Icepay_Api_Base {
      * @access protected
      * @return string
      */
-    protected function getTimeStamp() {
+    public function getTimeStamp()
+    {
         return gmdate("Y-m-d\TH:i:s\Z");
     }
 
@@ -182,7 +205,8 @@ class Icepay_Webservice_Base extends Icepay_Api_Base {
      * @access protected
      * @return string
      */
-    protected function getIP() {
+    protected function getIP()
+    {
         return $_SERVER['REMOTE_ADDR'];
     }
 
@@ -195,7 +219,8 @@ class Icepay_Webservice_Base extends Icepay_Api_Base {
      * @param array $order !required
      * @return object $obj     
      */
-    public function arrangeObject($object, $order = array()) {
+    public function arrangeObject($object, $order = array())
+    {
 
         if (!is_object($object))
             throw new Exception("Please provide a valid Object for the arrangeObject method");
@@ -221,7 +246,8 @@ class Icepay_Webservice_Base extends Icepay_Api_Base {
      * @param array $order !required if $arrange == true
      * @return object $obj  
      */
-    public function parseForChecksum($mainObject, $subObject, $arrange = false, $order = array()) {
+    public function parseForChecksum($mainObject, $subObject, $arrange = false, $order = array())
+    {
 
         if (!is_object($mainObject))
             throw new Exception("Please provide a valid Object");
@@ -258,24 +284,27 @@ class Icepay_Webservice_Base extends Icepay_Api_Base {
      * @access public
      * @param object $obj
      * @param string $secretCode  
+     * @param bool $isautocheckout  
      * @return string
      */
-    public function generateChecksum($obj = null, $secretCode = null) {
+    public function generateChecksum($obj = null, $secretCode = null,$isautocheckout = false)
+    {
         $arr = array();
         if ($secretCode)
             array_push($arr, $secretCode);
 
-        $i = 0;
         foreach ($obj as $val) {
-
             $insert = $val;
 
             if (is_bool($val)) {
-                $insert = ($val) ? 'true' : 'false';
+                if ($isautocheckout) {
+					$insert = ($val) ? 'True' : 'False';	// autocheckout function computes boolean checksum differently (first character uppercase)
+				} else {
+					$insert = ($val) ? 'true' : 'false';
+				}
             }
 
             array_push($arr, $insert);
-            $i++;
         }
 
         return sha1(implode("|", $arr));
@@ -289,7 +318,8 @@ class Icepay_Webservice_Base extends Icepay_Api_Base {
      * @param object $obj
      * @return array 
      */
-    protected function forceArray($obj) {
+    protected function forceArray($obj)
+    {
         if (is_array($obj))
             return $obj;
 
@@ -310,7 +340,8 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
     protected $_paymentMethodsArray;
     protected $_savedData = array();
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->setupClient();
     }
 
@@ -322,7 +353,8 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
      * 
      * @return \Icepay_Webservice_Paymentmethods 
      */
-    public function retrieveAllPaymentmethods() {
+    public function retrieveAllPaymentmethods()
+    {
         if (isset($this->_paymentMethodsArray))
             return $this;
 
@@ -336,7 +368,7 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
         $obj->SecretCode = null;
 
         $this->_paymentMethods = $this->client->GetMyPaymentMethods(array('request' => $obj));
-        
+
         if (isset($this->_paymentMethods->GetMyPaymentMethodsResult->PaymentMethods->PaymentMethod)) {
             $this->_paymentMethodsArray = $this->clean($this->_paymentMethods);
         }
@@ -352,7 +384,8 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
      * @param object $obj
      * @return array 
      */
-    protected function clean($obj) {
+    protected function clean($obj)
+    {
         $methods = array();
 
         foreach ($this->forceArray($obj->GetMyPaymentMethodsResult->PaymentMethods->PaymentMethod) as $value) {
@@ -374,7 +407,8 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
      * @param array $array
      * @return array 
      */
-    private function convertIssuers($array) {
+    private function convertIssuers($array)
+    {
         $return = array();
         foreach ($array as $value) {
             array_push($return, array(
@@ -395,7 +429,8 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
      * @param array $array
      * @return array 
      */
-    private function convertCountries($array) {
+    private function convertCountries($array)
+    {
         $return = array();
         foreach ($array as $value) {
             array_push($return, array(
@@ -416,7 +451,8 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
      * @param string $string
      * @return string 
      */
-    private function convertCurrencies($string) {
+    private function convertCurrencies($string)
+    {
         $return = explode(", ", $string);
         return $return;
     }
@@ -428,7 +464,8 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
      * @access public
      * @return array 
      */
-    public function asArray() {
+    public function asArray()
+    {
         return $this->_paymentMethodsArray;
     }
 
@@ -439,7 +476,8 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
      * @access public
      * @return object 
      */
-    public function asObject() {
+    public function asObject()
+    {
         return $this->_paymentMethods;
     }
 
@@ -450,7 +488,8 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
      * @access public
      * @return string 
      */
-    public function exportAsString() {
+    public function exportAsString()
+    {
         return urlencode(serialize($this->_paymentMethodsArray));
     }
 
@@ -464,7 +503,8 @@ class Icepay_Webservice_Paymentmethods extends Icepay_Webservice_Base {
      * @return boolean
      * @throws Exception 
      */
-    public function saveToFile($fileName = "wsdata", $directory = "") {
+    public function saveToFile($fileName = "wsdata", $directory = "")
+    {
         if ($directory == "")
             $directory = dirname(__FILE__);
 
@@ -501,7 +541,8 @@ class Icepay_Webservice_Filtering {
      * @param string $string
      * @return \Icepay_Webservice_Filtering 
      */
-    public function importFromString($string) {
+    public function importFromString($string)
+    {
         $this->_paymentMethodsArray = unserialize(urldecode($string));
         $this->_paymentMethodsArrayFiltered = $this->_paymentMethodsArray;
         return $this;
@@ -514,7 +555,8 @@ class Icepay_Webservice_Filtering {
      * @access public
      * @return string
      */
-    public function exportAsString() {
+    public function exportAsString()
+    {
         return urlencode(serialize($this->_paymentMethodsArrayFiltered));
     }
 
@@ -526,7 +568,8 @@ class Icepay_Webservice_Filtering {
      * @param array $array
      * @return \Icepay_Webservice_Filtering 
      */
-    public function loadFromArray($array) {
+    public function loadFromArray($array)
+    {
         $this->_paymentMethodsArray = $array;
         $this->_paymentMethodsArrayFiltered = $this->_paymentMethodsArray;
         return $this;
@@ -542,7 +585,8 @@ class Icepay_Webservice_Filtering {
      * @return \Icepay_Webservice_Filtering
      * @throws Exception 
      */
-    public function loadFromFile($fileName = "wsdata", $directory = "") {
+    public function loadFromFile($fileName = "wsdata", $directory = "")
+    {
         if ($directory == "")
             $directory = dirname(__FILE__);
 
@@ -572,7 +616,8 @@ class Icepay_Webservice_Filtering {
      * @access public 
      * @return array 
      */
-    public function getPaymentmethods() {
+    public function getPaymentmethods()
+    {
         return $this->_paymentMethodsArray;
     }
 
@@ -583,7 +628,8 @@ class Icepay_Webservice_Filtering {
      * @access public
      * @return array 
      */
-    public function getFilteredPaymentmethods() {
+    public function getFilteredPaymentmethods()
+    {
         return $this->_paymentMethodsArrayFiltered;
     }
 
@@ -593,7 +639,8 @@ class Icepay_Webservice_Filtering {
      * @access public
      * @param string $currency Language ISO 4217 code
      */
-    public function filterByCurrency($currency) {
+    public function filterByCurrency($currency)
+    {
         $filteredArr = array();
         foreach ($this->_paymentMethodsArrayFiltered as $paymentMethod) {
             $continue = true;
@@ -620,7 +667,8 @@ class Icepay_Webservice_Filtering {
      * @access public
      * @param string $country Country ISO 3166-1-alpha-2 code
      */
-    public function filterByCountry($countryCode) {
+    public function filterByCountry($countryCode)
+    {
         $filteredArr = array();
         foreach ($this->_paymentMethodsArrayFiltered as $paymentMethod) {
             $continue = true;
@@ -647,7 +695,8 @@ class Icepay_Webservice_Filtering {
      * @access public
      * @param int $amount Amount in cents
      */
-    public function filterByAmount($amount) {
+    public function filterByAmount($amount)
+    {
         $amount = intval($amount);
         $filteredArr = array();
         foreach ($this->_paymentMethodsArrayFiltered as $paymentMethod) {
@@ -690,7 +739,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @return \Icepay_Webservice_Paymentmethod
      * @throws Exception 
      */
-    public function selectPaymentMethodByCode($name) {
+    public function selectPaymentMethodByCode($name)
+    {
         if (!isset($this->_paymentMethodsArray))
             throw new Exception("No data loaded");
         foreach ($this->_paymentMethodsArray as $paymentMethod) {
@@ -711,7 +761,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @return \Icepay_Webservice_Paymentmethod
      * @throws Exception 
      */
-    public function selectIssuerByKeyword($name) {
+    public function selectIssuerByKeyword($name)
+    {
         if (!isset($this->_paymentMethodsArray))
             throw new Exception("No data loaded");
         foreach ($this->_paymentMethodsArray as $paymentMethod) {
@@ -734,7 +785,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @param string $country
      * @return \Icepay_Webservice_Paymentmethod 
      */
-    public function selectCountry($country) {
+    public function selectCountry($country)
+    {
         if (!isset($this->_issuerData)) {
             $this->_country = $this->validateCountry($country);
             return $this;
@@ -759,7 +811,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @access public
      * @return array
      */
-    public function getPaymentmethodData() {
+    public function getPaymentmethodData()
+    {
         return $this->_methodData;
     }
 
@@ -770,7 +823,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @access public
      * @return array 
      */
-    public function getIssuerData() {
+    public function getIssuerData()
+    {
         return $this->_issuerData;
     }
 
@@ -782,7 +836,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @return array
      * @throws Exception 
      */
-    public function getIssuers() {
+    public function getIssuers()
+    {
         if (!isset($this->_methodData))
             throw new Exception("Paymentmethod must be selected first");
         return $this->_methodData["Issuers"];
@@ -796,7 +851,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @return array
      * @throws Exception 
      */
-    public function getCurrencies() {
+    public function getCurrencies()
+    {
         if (!isset($this->_issuerData))
             throw new Exception("Issuer must be selected first");
         if (!isset($this->_country))
@@ -817,7 +873,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @return array
      * @throws Exception 
      */
-    public function getCountries() {
+    public function getCountries()
+    {
         if (!isset($this->_issuerData))
             throw new Exception("Issuer must be selected first");
         $countries = array();
@@ -835,7 +892,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @return int
      * @throws Exception 
      */
-    public function getMinimumAmount() {
+    public function getMinimumAmount()
+    {
         if (!isset($this->_issuerData))
             throw new Exception("Issuer must be selected first");
         if (!isset($this->_country))
@@ -855,7 +913,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @return int
      * @throws Exception 
      */
-    public function getMaximumAmount() {
+    public function getMaximumAmount()
+    {
         if (!isset($this->_issuerData))
             throw new Exception("Issuer must be selected first");
         if (!isset($this->_country))
@@ -876,7 +935,8 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
      * @return string
      * @throws Exception 
      */
-    protected function validateCountry($country) {
+    protected function validateCountry($country)
+    {
         if (strlen($country) != 2)
             throw new Exception("Country must be ISO 3166-1 alpha-2");
         return strtoupper($country);
@@ -888,30 +948,34 @@ class Icepay_Webservice_Paymentmethod extends Icepay_Webservice_Filtering {
  * @package API_Webservice_Checkout
  */
 class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
-    
-    private $extendedCheckoutList = array();
 
-    public function __construct() {
+    private $extendedCheckoutList = array('AFTERPAY');
+    private $autoCheckoutList = array(
+        'CREDITCARD' => array('CCAUTOCHECKOUT'),
+        'DDEBIT' => array('IDEALINCASSO'));
+
+    public function __construct()
+    {
         $this->setupClient();
     }
-    
-    public function addToExtendedCheckoutList($paymentMethods) {
+
+    public function addToExtendedCheckoutList($paymentMethods)
+    {
         $this->extendedCheckoutList = array_merge($this->extendedCheckoutList, $paymentMethods);
-        
+
         return $this;
     }
 
-    public function isExtendedCheckoutRequiredByPaymentMethod($paymentMethod) {        
+    public function isExtendedCheckoutRequiredByPaymentMethod($paymentMethod)
+    {
         if (in_array($paymentMethod, $this->extendedCheckoutList))
             return true;
-        
+
         return false;
     }
-    
-    /*
-     * @package API.Webservice.Pay.ExtendedCheckout
-     */
-    public function extendedCheckout(Icepay_PaymentObject_Interface_Abstract $paymentObj, $getUrlOnly = false) {
+
+    public function extendedCheckout(Icepay_PaymentObject_Interface_Abstract $paymentObj, $getUrlOnly = false)
+    {
         $obj = new stdClass();
 
         Icepay_Order::getInstance()->validateOrder($paymentObj);
@@ -963,6 +1027,121 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
         return $transactionObj;
     }
 
+    private function validateAutoCheckout($paymentObj)
+    {
+        // Check if PaymentMethod is allowed
+        if (!array_key_exists($paymentObj->PaymentMethod, $this->autoCheckoutList))
+            throw new Exception("Error: Paymentmethod {$paymentObj->PaymentMethod} is not allowed to use autoCheckout");
+
+        // Check if Issuer is allowed
+        if (!in_array($paymentObj->Issuer, $this->autoCheckoutList[$paymentObj->PaymentMethod]))
+            throw new Exception("Error: Issuer {$paymentObj->Issuer} is not allowed to use autoCheckout");
+
+        return true;
+    }
+
+    public function autoCheckout(Icepay_PaymentObject_Interface_Abstract $paymentObj, $consumerID)
+    {
+        $obj = new StdClass();
+
+        $obj->MerchantID = $this->getMerchantID();
+        $obj->Timestamp = $this->getTimeStamp();
+        $obj->Amount = $paymentObj->getAmount();
+        $obj->Country = $paymentObj->getCountry();
+        $obj->Currency = $paymentObj->getCurrency();
+        $obj->Description = $paymentObj->getDescription();
+        $obj->EndUserIP = $this->getIP();
+        $obj->Issuer = $paymentObj->getIssuer();
+        $obj->Language = $paymentObj->getLanguage();
+        $obj->OrderID = $paymentObj->getOrderID();
+        $obj->PaymentMethod = $paymentObj->getPaymentMethod();
+        $obj->Reference = $paymentObj->getReference();
+        $obj->URLCompleted = $this->getSuccessURL();
+        $obj->URLError = $this->getErrorURL();
+
+        $this->validateAutoCheckout($obj);
+
+        // Generate Checksum
+        $obj->Checksum = $this->generateChecksum($obj, $this->getSecretCode(), true);
+
+        // Checksum is generated without the consumer ID
+        $obj->ConsumerID = $consumerID;
+
+        // Call the webservice
+        $result = $this->client->automaticCheckout(array('request' => $obj));
+
+        /* store the checksum momentarily */
+        $checksum = $result->AutomaticCheckoutResult->Checksum;
+
+        /* Replace the checksum in the data with secretCode to generate a new checksum */
+        $result->AutomaticCheckoutResult->Checksum = $this->getSecretCode();
+
+        $checksumObject = $this->arrangeObject($result->AutomaticCheckoutResult, array(
+            'Checksum', 'MerchantID', 'Timestamp', 'PaymentID', 'Success', 'ErrorDescription'
+        ));
+
+        /* Verify response data */
+        if ($checksum != $this->generateChecksum($checksumObject, null, true))
+            throw new Exception("Data could not be verified");
+
+        // Return checksum
+        $result->AutomaticCheckoutResult->Checksum = $checksum;
+
+        return $result->AutomaticCheckoutResult;
+    }
+
+    public function vaultCheckout(Icepay_PaymentObject_Interface_Abstract $paymentObj, $consumerID, $getUrlOnly = false)
+    {
+        $obj = new StdClass();
+
+        $obj->MerchantID = $this->getMerchantID();
+        $obj->Timestamp = $this->getTimeStamp();
+        $obj->Amount = $paymentObj->getAmount();
+        $obj->Country = $paymentObj->getCountry();
+        $obj->Currency = $paymentObj->getCurrency();
+        $obj->Description = $paymentObj->getDescription();
+        $obj->EndUserIP = $this->getIP();
+        $obj->Issuer = $paymentObj->getIssuer();
+        $obj->Language = $paymentObj->getLanguage();
+        $obj->OrderID = $paymentObj->getOrderID();
+        $obj->PaymentMethod = $paymentObj->getPaymentMethod();
+        $obj->Reference = $paymentObj->getReference();
+        $obj->URLCompleted = $this->getSuccessURL();
+        $obj->URLError = $this->getErrorURL();
+
+        // Generate Checksum
+        $obj->Checksum = $this->generateChecksum($obj, $this->getSecretCode());
+
+        // Checksum is generated without the consumer ID
+        $obj->ConsumerID = $consumerID;
+
+        // Call the webservice
+        $result = $this->client->VaultCheckout(array('request' => $obj));
+
+        /* store the checksum momentarily */
+        $checksum = $result->VaultCheckoutResult->Checksum;
+
+        /* Replace the checksum in the data with secretCode to generate a new checksum */
+        $result->VaultCheckoutResult->Checksum = $this->getSecretCode();
+
+        /* Verify response data */
+        if ($checksum != $this->generateChecksum($result->VaultCheckoutResult))
+            throw new Exception("Data could not be verified");
+
+        /* Return mister checksum */
+        $result->VaultCheckoutResult->Checksum = $checksum;
+
+        /* Return just the payment URL if required */
+        if ($getUrlOnly)
+            return $result->VaultCheckoutResult->PaymentScreenURL;
+
+        $transactionObj = new Icepay_TransactionObject();
+        $transactionObj->setData($result->VaultCheckoutResult);
+
+        /* Default return all data */
+        return $transactionObj;
+    }
+
     /**
      * The Checkout web method allows you to  initialize a new payment in the ICEPAY system for  ALL the 
      * payment methods that you have access to
@@ -973,7 +1152,8 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
      * @param bool $geturlOnly
      * @return array result
      */
-    public function checkOut(Icepay_PaymentObject_Interface_Abstract $paymentObj, $getUrlOnly = false) {
+    public function checkOut(Icepay_PaymentObject_Interface_Abstract $paymentObj, $getUrlOnly = false)
+    {
         $obj = new stdClass();
 
         // Must be in specific order for checksum ---------
@@ -1034,7 +1214,8 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
      * @param bool $geturlOnly
      * @return array result
      */
-    public function phoneCheckout(Icepay_PaymentObject_Interface_Abstract $paymentObj, $getUrlOnly = false) {
+    public function phoneCheckout(Icepay_PaymentObject_Interface_Abstract $paymentObj, $getUrlOnly = false)
+    {
         $obj = new StdClass();
 
         // Must be in specific order for checksum ---------
@@ -1089,7 +1270,8 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
      * @param bool $geturlOnly
      * @return array
      */
-    public function smsCheckout(Icepay_PaymentObject_Interface_Abstract $paymentObj, $getUrlOnly = false) {
+    public function smsCheckout(Icepay_PaymentObject_Interface_Abstract $paymentObj, $getUrlOnly = false)
+    {
         $obj = new StdClass();
 
         // Must be in specific order for checksum ---------
@@ -1126,7 +1308,7 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
             'OrderID', 'PaymentID', 'PaymentMethod', 'PaymentScreenURL',
             'ProviderTransactionID', 'Reference', 'TestMode', 'URLCompleted',
             'URLError', 'ActivationCode', 'Keyword', 'PremiumNumber', 'Disclaimer'
-                ));
+        ));
 
         /* Verify response data */
         if ($checksum != $this->generateChecksum($checksumObject))
@@ -1153,7 +1335,8 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
      * @param int $phoneCode
      * @return bool success
      */
-    public function validatePhoneCode($paymentID, $phoneCode) {
+    public function validatePhoneCode($paymentID, $phoneCode)
+    {
         $obj = new StdClass();
 
         // Must be in specific order for checksum ---------        
@@ -1189,7 +1372,8 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
      * @param int $smsCode
      * @return bool success
      */
-    public function validateSmsCode($paymentID, $smsCode) {
+    public function validateSmsCode($paymentID, $smsCode)
+    {
         $obj = new StdClass();
 
         // Must be in specific order for checksum ---------        
@@ -1225,7 +1409,8 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
      * @param object $data
      * @return array result
      */
-    public function phoneDirectCheckout(Icepay_PaymentObject_Interface_Abstract $paymentObj) {
+    public function phoneDirectCheckout(Icepay_PaymentObject_Interface_Abstract $paymentObj)
+    {
         $obj = new StdClass();
 
         // Must be in specific order for checksum ---------
@@ -1286,7 +1471,8 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
      * @access public
      * @return array result
      */
-    public function getPremiumRateNumbers() {
+    public function getPremiumRateNumbers()
+    {
         $obj = new StdClass();
 
         $obj->MerchantID = $this->getMerchantID();
@@ -1329,7 +1515,8 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
      * @param int $paymentID
      * @return array result
      */
-    public function getPayment($paymentID) {
+    public function getPayment($paymentID)
+    {
         $obj = new StdClass();
 
         $obj->SecretCode = $this->getSecretCode();
@@ -1355,7 +1542,7 @@ class Icepay_Webservice_Pay extends Icepay_Webservice_Base {
             "ConsumerPhoneNumber", "Currency", "Description", "Duration",
             "Issuer", "OrderID", "OrderTime", "PaymentMethod", "PaymentTime",
             "Reference", "Status", "StatusCode", "TestMode"
-                ));
+        ));
 
         /* Verify response data */
         if ($checksum != $this->generateChecksum($result))
@@ -1377,7 +1564,8 @@ class Icepay_Webservice_Refunds extends Icepay_Webservice_Base {
 
     protected $service = 'https://connect.icepay.com/webservice/refund.svc?wsdl';
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->setupClient();
     }
 
@@ -1393,7 +1581,8 @@ class Icepay_Webservice_Refunds extends Icepay_Webservice_Base {
      * @param int $refundAmount Amount in cents
      * @param string $refundCurrency
      */
-    public function requestRefund($paymentID, $refundAmount, $refundCurrency) {
+    public function requestRefund($paymentID, $refundAmount, $refundCurrency)
+    {
         $obj = new stdClass();
 
         // Must be in specific order for checksum --
@@ -1441,7 +1630,8 @@ class Icepay_Webservice_Refunds extends Icepay_Webservice_Base {
      * @param int $refundID
      * @param int $paymentID
      */
-    public function cancelRefund($refundID, $paymentID) {
+    public function cancelRefund($refundID, $paymentID)
+    {
         $obj = new stdClass();
 
         // Must be in specific order for checksum --
@@ -1481,7 +1671,8 @@ class Icepay_Webservice_Refunds extends Icepay_Webservice_Base {
      * @access public
      * @param int $paymentID
      */
-    public function getPaymentRefunds($paymentID) {
+    public function getPaymentRefunds($paymentID)
+    {
         $obj = new stdClass();
 
         // Must be in specific order for checksum --
@@ -1535,11 +1726,13 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
     protected $_cookie;
     protected $_phpsession;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->setupClient();
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         if ($this->_autokill)
             $this->killSession();
     }
@@ -1550,7 +1743,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      * @param string $val 
      */
-    public function setSessionID($val) {
+    public function setSessionID($val)
+    {
         $this->_session = $val;
         return $this;
     }
@@ -1561,7 +1755,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      * @return (string)session
      */
-    public function getSessionID() {
+    public function getSessionID()
+    {
         return $this->_session;
     }
 
@@ -1571,7 +1766,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      * @param string $val 
      */
-    public function setUsername($val) {
+    public function setUsername($val)
+    {
         $this->_username = $val;
         return $this;
     }
@@ -1582,7 +1778,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access private
      * @return (string)username
      */
-    private function getUsername() {
+    private function getUsername()
+    {
         return $this->_username;
     }
 
@@ -1592,7 +1789,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      * @param bool $bool
      */
-    public function autoKill($bool) {
+    public function autoKill($bool)
+    {
         $this->_autokill = $bool;
         return $this;
     }
@@ -1603,7 +1801,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      * @param string $val 
      */
-    public function setUserAgent($val) {
+    public function setUserAgent($val)
+    {
         $this->_useragent = $val;
         return $this;
     }
@@ -1614,7 +1813,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      * @return (string)useragent
      */
-    private function getUserAgent() {
+    private function getUserAgent()
+    {
         return $this->_useragent;
     }
 
@@ -1626,7 +1826,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @param bool $bool
      */
 
-    public function useCookie($bool = true) {
+    public function useCookie($bool = true)
+    {
         $this->_cookie = $bool;
         return $this;
     }
@@ -1639,7 +1840,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @param bool $bool
      */
 
-    public function usePHPSession($bool = true) {
+    public function usePHPSession($bool = true)
+    {
         if (!isset($_SESSION)) {
             session_start();
         }
@@ -1655,7 +1857,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @param bool $sessionID
      */
 
-    public function createPHPSession($sessionID = true) {
+    public function createPHPSession($sessionID = true)
+    {
         if ($sessionID) {
             $_SESSION[$this->_sessionName] = $this->_session;
         }
@@ -1671,7 +1874,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @return bool
      */
 
-    private function readFromPHPSession($sessionID = true) {
+    private function readFromPHPSession($sessionID = true)
+    {
         if ($sessionID) {
             if (isset($_SESSION[$this->_sessionName]) && $_SESSION[$this->_sessionName] != "") {
                 $this->_session = $_SESSION[$this->_sessionName]->SessionID;
@@ -1688,7 +1892,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access private
      */
 
-    private function unsetPHPSession() {
+    private function unsetPHPSession()
+    {
         unset($_SESSION[$this->_sessionName]);
     }
 
@@ -1699,7 +1904,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      * @return obj this
      */
-    public function createCookie($cookie = true) {
+    public function createCookie($cookie = true)
+    {
         if ($cookie) {
             $cookietime = time() + (60 * 60 * 24 * 365);
             setcookie($this->_sessionName . "_SessionID", $this->_session->SessionID, $cookietime);
@@ -1716,7 +1922,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      * @return bool
      */
-    private function readFromCookie($cookie = true) {
+    private function readFromCookie($cookie = true)
+    {
         if ($cookie) {
             if (isset($_COOKIE[$this->_sessionName . "_SessionID"])) {
                 $this->_session = $_COOKIE[$this->_sessionName . "_SessionID"];
@@ -1734,12 +1941,14 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public     * 
      */
 
-    public function unsetCookie() {
+    public function unsetCookie()
+    {
         setcookie("icepay_api_webservice_reportingsession_SessionID", '', time() - 1000);
         setcookie("icepay_api_webservice_reportingsession_Timestamp", '', time() - 1000);
     }
 
-    public function initSession() {
+    public function initSession()
+    {
         if ($this->_cookie && $this->readFromCookie())
             return true;
         if ($this->_phpsession && $this->readFromPHPSession())
@@ -1754,7 +1963,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      * @return (array)session
      */
-    public function createSession() {
+    public function createSession()
+    {
         $obj = new stdClass();
 
         $obj->Timestamp = $this->getTimeStamp();
@@ -1804,7 +2014,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      */
 
-    public function setSessionName($name = "icepay_api_webservice_reportingsession") {
+    public function setSessionName($name = "icepay_api_webservice_reportingsession")
+    {
         $this->_sessionName = $name;
     }
 
@@ -1816,7 +2027,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @return string $timestamp
      */
 
-    private function getSessionTimestamp() {
+    private function getSessionTimestamp()
+    {
         if ($this->_phpsession && isset($_SESSION[$this->_sessionName]->SessionID))
             $timestamp = $_SESSION[$this->_sessionName]->SessionID;
 
@@ -1835,7 +2047,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @return array $session
      */
 
-    public function killSession() {
+    public function killSession()
+    {
         $obj = new stdClass();
 
         $obj->Timestamp = $this->getSessionTimestamp();
@@ -1868,7 +2081,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @param int $year !required
      * @param string $currency
      */
-    public function monthlyTurnoverTotals($month, $year, $currency = "EUR") {
+    public function monthlyTurnoverTotals($month, $year, $currency = "EUR")
+    {
         if ($month == "" || !is_numeric($month))
             throw new Exception('Please enter a valid month');
         if ($year == "" || !is_numeric($year))
@@ -1922,7 +2136,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @access public
      * @return array
      */
-    public function getMerchants() {
+    public function getMerchants()
+    {
         $obj = new stdClass();
 
         // Must be in specific order for checksum --
@@ -1965,7 +2180,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @since version 2.1.0
      * @access public
      */
-    public function getPaymentMethods() {
+    public function getPaymentMethods()
+    {
         $obj = new stdClass();
 
         // Must be in specific order for checksum --
@@ -2011,7 +2227,8 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
      * @param array searchOptions
      * @return array
      */
-    public function searchPayments($searchOptions = array()) {
+    public function searchPayments($searchOptions = array())
+    {
 
         $obj = new stdClass();
         // Must be in specific order for checksum ----------
@@ -2075,7 +2292,7 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
                 "Amount", "ConsumerAccountNumber", "ConsumerAddress", "ConsumerHouseNumber", "ConsumerName",
                 "ConsumerPostCode", "CountryCode", "CurrencyCode", "Duration", "MerchantID", "OrderTime",
                 "PaymentID", "PaymentMethod", "PaymentTime", "Status", "StatusCode", "TestMode"
-                    ));
+            ));
         }
 
         // Verify response data by making a new Checksum
@@ -2086,6 +2303,75 @@ class Icepay_Webservice_Reporting extends Icepay_Webservice_Base {
             throw new Exception('Data could not be verified');
 
         return (array) $searchResults;
+    }
+
+}
+
+/**
+ * Icepay AutoCapture Webservice class
+ * 
+ * @version 1.0.0
+ * @author Wouter van Tilburg <wouter@icepay.eu>
+ * @copyright Copyright (c) 2012, ICEPAY
+ */
+class Icepay_Webservice_AutoCapture extends Icepay_Webservice_Base {
+
+    protected $service = 'https://connect.icepay.com/webservice/APCapture.svc?wsdl';
+
+    /**
+     * AutoCapture Webservice class constructer
+     * 
+     * @since 1.0.0
+     */
+    public function __construct()
+    {
+        $this->setupClient();
+    }
+
+    /**
+     * Capture an authorized AfterPay payment
+     * 
+     * @since 1.0.0
+     * 
+     * @param string $paymentID
+     * @param int $amount
+     * @param string $currency
+     * @return object
+     */
+    public function captureFull($paymentID, $amount = 0, $currency = '')
+    {
+        $obj = new stdClass();
+        
+        $obj->MerchantID = $this->getMerchantID();
+        $obj->Timestamp = $this->getTimestamp();
+        $obj->amount = $amount;
+        $obj->currency = $currency;
+        $obj->PaymentID = $paymentID;
+        
+        // Generate checksum for the request
+        $obj->Checksum = $this->generateChecksum($obj, $this->getSecretCode());
+        
+        // Make the request
+        $request = $this->client->CaptureFull($obj);
+        
+        // Fetch the result
+        $result = $request->CaptureFullResult;
+        
+        // Store result checksum
+        $resultChecksum = $result->Checksum;
+        
+        // Remove result checksum from object
+        unset($result->Checksum);
+        
+        // Create result checksum
+        $checkSum = $this->generateChecksum($result, $this->getSecretCode());
+        
+        // Compare generated checksum and result checksum
+        if ($resultChecksum !== $checkSum)
+            throw new Exception('Data could not be verified');
+        
+        // Return result
+        return $result;
     }
 
 }

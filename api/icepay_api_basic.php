@@ -3,7 +3,7 @@
 /**
  *  ICEPAY API
  *
- *  @version 2.2.0
+ *  @version 2.3.0
  *  @author Olaf Abbenhuis
  *  @author Wouter van Tilburg
  *  @copyright Copyright (c) 2012, ICEPAY

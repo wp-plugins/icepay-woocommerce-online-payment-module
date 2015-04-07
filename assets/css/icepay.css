@@ -40,9 +40,6 @@ div.ic_getpaymentmethods_error {
 div#icepay-container {
     background-color: #F2F2F2;
     padding: 15px 10px 10px 10px;
-    background-image: url('../images/icepay-logo-bg.png');
-    background-repeat: no-repeat;
-    background-position: center right;
     min-height: 550px;
 }
 

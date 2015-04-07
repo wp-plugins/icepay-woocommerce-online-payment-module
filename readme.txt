@@ -2,9 +2,9 @@
 Contributors: ICEPAY
 Donate link: http://www.icepay.com
 Tags: ICEPAY, Online Payment Plugin, WooCommerce, Payment Service Provider, Online payments, online transaction, secure payments, internet payment solution, secure payment processing, iDeal, Giropay, sofortbanking, text sms payments, phone payments, Creditcard, Visa, MasterCard, American Express, Diners Club International, Maestro International, JCB, Laser, Carte Bleue, Dankort, CartaSi, Debit cards, full-service provider, local service, global payments
-Requires at least: 3.0.1
-Tested up to: 4.0
-Stable tag: 2.2.10
+Requires at least: 4.0
+Tested up to: 4.1.1
+Stable tag: 2.3.0
 License: GNU GENERAL PUBLIC LICENSE - Version 3, 29 June 2007
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -37,7 +37,7 @@ With the ICEPAY WordPress WooCommerce Online Payment plugin you have a vast arra
 
 **Please note: This addon only works with a valid and approved ICEPAY account. Please visit the [ICEPAY website](http://www.icepay.com/ "ICEPAY website") for more information**
 
-**Requires at least Wordpress WooCommerce plugin: 1.6.5.2**
+**Requires at least Wordpress WooCommerce plugin: 2.3**
 
 *This plugin is in no way affiliated with the [WooCommerce plugin](http://wordpress.org/extend/plugins/woocommerce/ "WooCommerce Plugin Page").*
 
@@ -86,6 +86,15 @@ Visit our website for more information about this plugin, our accounts, and the 
 4. The ICEPAY WordPress WooCommerce Online Payment plugin allows you to offer the most frequently used national and international online payment methods including iDeal, Giropay, PayPal, MrCash/Bancontact, Sofortbanking, text/sms payments, phone payments, Creditcard, Visa, MasterCard, American Express, Diners Club International, Maestro International, JCB, Laser, Carte Bleue, Dankort, CartaSi and Debit cards.
 
 == Changelog ==
+
+= 2.3.0 =
+* Removed Friesland Bank from iDEAL payment method.
+* Refactored Dutch and English translations from source files.
+* Removed backwards compatibility for WooCommerce < 2.3.
+* Fixed postback matching issues in the result function.
+* Fixed some plugin hrefs that leads to permission denied errors.
+* Replaced old logo with new one.
+* Translated hardcoded strings.
 
 = 2.2.10 =
 * Fixed the order status
