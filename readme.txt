@@ -87,6 +87,9 @@ Visit our website for more information about this plugin, our accounts, and the 
 
 == Changelog ==
 
+= 2.3.1 =
+* Fixed an possible issue with Afterpay taxes.
+
 = 2.3.0 =
 * Removed Friesland Bank from iDEAL payment method.
 * Refactored Dutch and English translations from source files.

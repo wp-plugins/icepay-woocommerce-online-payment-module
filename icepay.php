@@ -11,7 +11,7 @@
  * Description: Enables ICEPAY Payments within WooCommerce.
  * Author: ICEPAY
  * Author URI: http://www.icepay.com
- * Version: 2.3.0
+ * Version: 2.3.1
  */
 
 add_action('plugins_loaded', 'ICEPAY_Init');
@@ -555,6 +555,7 @@ function ICEPAY_Init() {
 
                         // WooCommerce calculates taxes per row instead of per unit price
                         // Sadly need to make an tax correction for Afterpay untill WooCommerce has tax calculation based on unit price.
+                        /*
                         $totalPriceTaxPerRow = ($item['line_tax'] + $item['line_total']) * 100;
                         $totalPriceTaxPerUnit = $price * $item['qty'];
 
@@ -571,6 +572,7 @@ function ICEPAY_Init() {
                                     ->setVATCategory(Icepay_Order_VAT::getCategoryForPercentage(0))
                                 );
                         }
+                        */
                     };
 
                     $billingAddress = $order->billing_address_1 . " " . $order->billing_address_2;
