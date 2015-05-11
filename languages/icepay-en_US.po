@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: ICEPAY for WooCommerce\n"
-"POT-Creation-Date: 2015-04-03 10:20+0100\n"
-"PO-Revision-Date: 2015-04-03 10:22+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"Project-Id-Version: ICEPAY Payment Module\n"
+"POT-Creation-Date: 2015-05-08 13:18+0100\n"
+"PO-Revision-Date: 2015-05-08 13:18+0100\n"
+"Last-Translator: Ricardo Jacobs <ricardo.jacobs@icepay.com>\n"
+"Language-Team: Ricardo Jacobs <ricardo.jacobs@icepay.com>\n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,102 +13,149 @@ msgstr ""
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
-"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#: classes/helper.php:12
-msgid "No payment methods stored yet."
-msgstr "No payment methods stored yet."
+#: classes/helper.php:12 classes/helper.php:26 icepay.php:696
+msgid "Settings"
+msgstr "Settings"
 
-#: icepay.php:97
+#: classes/helper.php:16
+msgid "Warning: There are no payment methods configured yet."
+msgstr "Warning: There are no payment methods configured yet."
+
+#: icepay.php:102
 msgid "Loading payment method data..."
 msgstr "Loading payment method data..."
 
-#: icepay.php:98
+#: icepay.php:103
 msgid "Refresh payment methods"
-msgstr "Refresh Payment Methods"
+msgstr "Refresh payment methods"
 
-#: icepay.php:154 icepay.php:179
+#: icepay.php:160 icepay.php:185
 msgid "Postback URL installed successfully."
 msgstr "Postback URL installed successfully."
-
-#: icepay.php:188
-msgid "SOAP extension for PHP must be enabled. Please contact your webhoster."
-msgstr ""
-"SOAP extension for PHP must be enabled. Please contact your webhoster."
 
 #: icepay.php:223
 msgid "No active payment methods found for this merchant."
 msgstr "No active payment methods found for this merchant."
 
-#: icepay.php:247 icepay.php:490
-msgid "Module version"
-msgstr "Module version"
+#: icepay.php:239
+msgid ""
+"This plugin requires SOAP to make payments. Please contact your hosting "
+"provider to support SOAP."
+msgstr ""
+"This plugin requires SOAP to make payments. Please contact your hosting "
+"provider to support SOAP."
 
-#: icepay.php:248 icepay.php:491
+#: icepay.php:253 icepay.php:483
 msgid "View the manual"
 msgstr "View the manual"
 
-#: icepay.php:249 icepay.php:492
+#: icepay.php:254 icepay.php:484
 msgid "Visit the ICEPAY website"
 msgstr "Visit the ICEPAY website"
 
-#: icepay.php:251
+#: icepay.php:255
+msgid "Configuration"
+msgstr "Configuration"
+
+#: icepay.php:256
+msgid "Payment methods"
+msgstr "Payment methods"
+
+#: icepay.php:257
+msgid "Information"
+msgstr "Information"
+
+#: icepay.php:259
+msgid "Merchant configuration"
+msgstr "Merchant configuration"
+
+#: icepay.php:260
 msgid ""
-"To configure your payment methods, press the payment method above or in the "
-"top navigation."
+"Your Merchant ID and Secretcode are available in the ICEPAY Merchant Portal. "
+"See the Manual for more information."
 msgstr ""
-"To configure your payment methods, press the payment method above or in the "
-"top navigation."
+"Your Merchant ID and Secretcode are available in the ICEPAY Merchant Portal. "
+"See the Manual for more information."
 
-#: icepay.php:252
+#: icepay.php:263
+msgid ""
+"Are there payments methods missing from this payment table? Enable or "
+"activate them in the ICEPAY Merchant Portal at"
+msgstr ""
+"Are there payments methods missing from this payment table? Enable or "
+"activate them in the ICEPAY Merchant Portal at"
+
+#: icepay.php:264
 msgid "Refresh Payment methods"
-msgstr "Refresh Payment Methods"
+msgstr "Refresh payment methods"
 
-#: icepay.php:293
-msgid "Set-up configuration"
-msgstr "Setup configuration"
+#: icepay.php:268
+msgid "Module version"
+msgstr "Module version"
 
-#: icepay.php:297
+#: icepay.php:269
+msgid "WC Version"
+msgstr "WooCommerce Version"
+
+#: icepay.php:271
+msgid "WP Version"
+msgstr "WP Version"
+
+#: icepay.php:273
+msgid "using ICEPAY API"
+msgstr "using ICEPAY API"
+
+#: icepay.php:274
+msgid ""
+"Please include this information when you create a support ticket, this way "
+"we can help you better"
+msgstr ""
+"Please include this information when you create a support ticket, this way "
+"we can help you better"
+
+#: icepay.php:314
 msgid "Postback URL"
 msgstr "Postback URL"
 
-#: icepay.php:300
+#: icepay.php:316
 msgid ""
 "Copy and paste this URL to the Success, Error and Postback section of your "
 "ICEPAY merchant account page."
 msgstr ""
-"Copy-Paste this URL to the Success, Error and Postback section of your "
-"ICEPAY merchant account."
+"Copy and paste this URL to the Success, Error and Postback section of your "
+"ICEPAY merchant account page."
 
-#: icepay.php:304
+#: icepay.php:320
 msgid "Merchant ID"
 msgstr "Merchant ID"
 
-#: icepay.php:307
+#: icepay.php:322
 msgid "Copy the Merchant ID from your ICEPAY account."
 msgstr "Copy the Merchant ID from your ICEPAY account."
 
-#: icepay.php:311
+#: icepay.php:326
 msgid "Secretcode"
 msgstr "Secretcode"
 
-#: icepay.php:314
+#: icepay.php:328
 msgid "Copy the Secret Code from your ICEPAY account."
 msgstr "Copy the Secret Code from your ICEPAY account."
 
-#: icepay.php:318
+#: icepay.php:332
 msgid "Optional configuration"
 msgstr "Optional configuration"
 
-#: icepay.php:322
+#: icepay.php:336
 msgid "Description on transaction statement"
-msgstr "Description on transaction statement of customer"
+msgstr "Description on transaction statement"
 
-#: icepay.php:325
+#: icepay.php:338
 msgid ""
 "Some payment methods allow customized descriptions on the transaction "
 "statement. If left empty the Order ID is used. (Max 100 char.)"
@@ -116,11 +163,11 @@ msgstr ""
 "Some payment methods allow customized descriptions on the transaction "
 "statement. If left empty the Order ID is used. (Max 100 char.)"
 
-#: icepay.php:329
+#: icepay.php:342
 msgid "Custom IP Range for IP Check for Postback"
 msgstr "Custom IP Range for IP Check for Postback"
 
-#: icepay.php:332
+#: icepay.php:344
 msgid ""
 "For example a proxy: 1.222.333.444-100.222.333.444 For multiple ranges use "
 "a , seperator: 2.2.2.2-5.5.5.5,8.8.8.8-9.9.9.9"
@@ -128,90 +175,93 @@ msgstr ""
 "For example a proxy: 1.222.333.444-100.222.333.444 For multiple ranges use "
 "a , seperator: 2.2.2.2-5.5.5.5,8.8.8.8-9.9.9.9"
 
-#: icepay.php:336
-msgid "Payment methods"
-msgstr "Refresh Payment Methods"
-
-#: icepay.php:347
+#: icepay.php:354
 msgid "Awaiting Payment"
 msgstr "Awaiting Payment"
 
-#: icepay.php:382
-msgid ""
-"The postback URL has changed! Please copy the new postback URL and paste it "
-"into your ICEPAY account."
-msgstr ""
-"The postback URL has changed! Please copy the new postback URL and paste it "
-"into your ICEPAY account."
-
-#: icepay.php:413
+#: icepay.php:406
 msgid "Active"
 msgstr "Active"
 
-#: icepay.php:416
+#: icepay.php:409
 msgid "Enable or disable the payment method during the checkout process"
 msgstr "Enable or disable the payment method during the checkout process"
 
-#: icepay.php:420
+#: icepay.php:413
 msgid "Displayname"
-msgstr "Displayname"
+msgstr "Display name"
 
-#: icepay.php:423
+#: icepay.php:416
 msgid "Name that will be displayed during the checkout."
 msgstr "Name that will be displayed during the checkout."
 
-#: icepay.php:453
+#: icepay.php:446
 msgid "AMEX"
 msgstr "American Express"
 
-#: icepay.php:454
+#: icepay.php:447
 msgid "VISA"
-msgstr "Visa"
+msgstr "VISA"
 
-#: icepay.php:455
+#: icepay.php:448
 msgid "MASTER"
 msgstr "Mastercard"
 
-#: icepay.php:456
+#: icepay.php:449
 msgid "ABNAMRO"
 msgstr "ABN AMRO"
 
-#: icepay.php:457
+#: icepay.php:450
 msgid "ASNBANK"
 msgstr "ASN Bank"
 
-#: icepay.php:458
+#: icepay.php:451
 msgid "ING"
 msgstr "ING Bank"
 
-#: icepay.php:459
+#: icepay.php:452
 msgid "RABOBANK"
 msgstr "Rabobank"
 
-#: icepay.php:460
+#: icepay.php:453
 msgid "SNSBANK"
 msgstr "SNS Bank"
 
-#: icepay.php:461
+#: icepay.php:454
 msgid "SNSREGIOBANK"
 msgstr "SNS Regio Bank"
 
-#: icepay.php:462
+#: icepay.php:455
 msgid "TRIODOSBANK"
 msgstr "Triodos Bank"
 
-#: icepay.php:463
+#: icepay.php:456
 msgid "VANLANSCHOT"
-msgstr "Van Lanschot"
+msgstr "Van Lanschot Bank"
 
-#: icepay.php:464
+#: icepay.php:457
 msgid "KNAB"
 msgstr "Knab"
 
-#: icepay.php:468
-msgid "Choose your bank"
-msgstr "Choose your bank"
+#: icepay.php:461
+msgid "Choose your payment method"
+msgstr "Choose your payment method"
 
-#: icepay.php:689
+#: icepay.php:657
+msgid "Currency is not supported by this payment method"
+msgstr "Currency is not supported by this payment method"
+
+#: icepay.php:659
+msgid "This order ID already exists. Please contact the shop."
+msgstr "This order ID already exists. Please contact the shop."
+
+#: icepay.php:664
 msgid "Payment error:"
 msgstr "Payment error:"
+
+#~ msgid ""
+#~ "The postback URL has changed! Please copy the new postback URL and paste "
+#~ "it into your ICEPAY account."
+#~ msgstr ""
+#~ "The postback URL has changed! Please copy the new postback URL and paste "
+#~ "it into your ICEPAY account."
