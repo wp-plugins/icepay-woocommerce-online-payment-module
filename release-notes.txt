@@ -1,0 +1,10 @@
+ICEPAY for WooCommerce
+
+:: Version 2.3.0
+   ~ Removed Friesland Bank from iDEAL payment method.
+   ~ Refactored Dutch and English translations from source files.
+   ~ Removed backwards compatibility for WooCommerce < 2.3.
+   ~ Fixed postback matching issues in the result function.
+   ~ Fixed some plugin hrefs that leads to permission denied errors.
+   ~ Replaced old logo with new one.
+   ~ Translated hardcoded strings.
