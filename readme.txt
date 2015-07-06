@@ -4,7 +4,7 @@ Donate link: http://www.icepay.com
 Tags: ICEPAY, Online Payment Plugin, WooCommerce, Payment Service Provider, Online payments, online transaction, secure payments, internet payment solution, secure payment processing, iDeal, Giropay, sofortbanking, text sms payments, phone payments, Creditcard, Visa, MasterCard, American Express, Diners Club International, Maestro International, JCB, Laser, Carte Bleue, Dankort, CartaSi, Debit cards, full-service provider, local service, global payments
 Requires at least: 4.0
 Tested up to: 4.1.1
-Stable tag: 2.3.3
+Stable tag: 2.3.4
 License: GNU GENERAL PUBLIC LICENSE - Version 3, 29 June 2007
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -87,9 +87,13 @@ Visit our website for more information about this plugin, our accounts, and the 
 
 == Changelog ==
 
+= 2.3.4 =
+* Fix - Correct German translation.
+* Fix - Secure HTTP does not throw HTTP 301 statuscode.
+* Fix - Open status on postback now correctly handled.
+
 = 2.3.3 =
 * Fix - Better translation when selecting payment method.
-
 
 = 2.3.2 =
 * Fix - Reduce stock of product when paying with Afterpay.
